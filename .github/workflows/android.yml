@@ -19,8 +19,8 @@ jobs:
           cache: 'gradle'
       - name: Change wrapper permissions
         run: chmod +x ./gradlew
-      - name: Run gradle tests --stacktrace
-        run: ./gradlew test
+      - name: Run gradle tests
+        run: ./gradlew test --stacktrace
       - name: Build Gradle Project
         run: ./gradlew build --stacktrace
       - name: Build APK Debug
