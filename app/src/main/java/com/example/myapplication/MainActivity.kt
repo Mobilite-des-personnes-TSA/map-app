@@ -4,11 +4,11 @@ import android.os.Bundle
 import android.preference.PreferenceManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import com.example.myapplication.R
 import org.osmdroid.config.Configuration.getInstance
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
-import java.util.*
+
 
 class MainActivity : AppCompatActivity() {
     private val REQUEST_PERMISSIONS_REQUEST_CODE = 1;
@@ -33,6 +33,10 @@ class MainActivity : AppCompatActivity() {
 
         map = findViewById<MapView>(R.id.map)
         map.setTileSource(TileSourceFactory.MAPNIK);
+        val mapController = map.controller
+        mapController.setZoom(13)
+        val startPoint = GeoPoint(43.6, 1.4333)
+        mapController.setCenter(startPoint)
     }
 
     override fun onResume() {
