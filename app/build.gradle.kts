@@ -1,3 +1,4 @@
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
@@ -37,6 +38,7 @@ android {
 }
 
 dependencies {
+    implementation (libs.osmbonuspack)
     implementation(libs.androidx.preference.ktx)
     implementation (libs.osmdroid.android)
     implementation(libs.androidx.core.ktx)

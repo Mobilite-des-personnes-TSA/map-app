@@ -2,12 +2,17 @@ package com.example.myapplication
 
 import android.os.Bundle
 import android.preference.PreferenceManager
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import org.osmdroid.bonuspack.routing.OSRMRoadManager
+import org.osmdroid.bonuspack.routing.Road
+import org.osmdroid.bonuspack.routing.RoadManager
 import org.osmdroid.config.Configuration.getInstance
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.Polyline
 
 
 class MainActivity : AppCompatActivity() {
@@ -37,6 +42,25 @@ class MainActivity : AppCompatActivity() {
         mapController.setZoom(13)
         val startPoint = GeoPoint(43.6, 1.4333)
         mapController.setCenter(startPoint)
+        Thread {
+            val roadManager: RoadManager = OSRMRoadManager(this,"User")
+            val waypoints = ArrayList<GeoPoint>()
+            waypoints.add(startPoint)
+            val endPoint = GeoPoint(43.7, 1.233)
+            waypoints.add(endPoint)
+            val road: Road = roadManager.getRoad(waypoints)
+            if (road.mStatus !== Road.STATUS_OK) Toast.makeText(
+                this,
+                "Error when loading the road - status=" + road.mStatus,
+                Toast.LENGTH_SHORT
+            ).show()
+
+            val roadOverlay: Polyline = RoadManager.buildRoadOverlay(road)
+            map.overlays.add(roadOverlay)
+            map.invalidate()
+        }.start()
+
+
     }
 
     override fun onResume() {
