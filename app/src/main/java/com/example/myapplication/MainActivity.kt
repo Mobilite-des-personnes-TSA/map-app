@@ -12,6 +12,7 @@ import org.osmdroid.config.Configuration.getInstance
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
 
 
@@ -57,6 +58,15 @@ class MainActivity : AppCompatActivity() {
 
             val roadOverlay: Polyline = RoadManager.buildRoadOverlay(road)
             map.overlays.add(roadOverlay)
+            val nodeIcon = getResources().getDrawable(R.drawable.marker_node)
+            for (i in road.mNodes.indices) {
+                val node = road.mNodes[i]
+                val nodeMarker = Marker(map)
+                nodeMarker.setPosition(node.mLocation)
+                nodeMarker.setIcon(nodeIcon)
+                nodeMarker.setTitle("Step $i")
+                map.overlays.add(nodeMarker)
+            }
             map.invalidate()
         }.start()
 
