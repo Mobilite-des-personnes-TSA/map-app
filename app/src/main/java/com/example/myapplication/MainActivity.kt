@@ -1,5 +1,6 @@
 package com.example.myapplication
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.widget.Toast
@@ -19,6 +20,7 @@ import org.osmdroid.views.overlay.Polyline
 class MainActivity : AppCompatActivity() {
     private val REQUEST_PERMISSIONS_REQUEST_CODE = 1;
     private lateinit var map: MapView;
+    @SuppressLint("UseCompatLoadingForDrawables")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState);
 
@@ -45,6 +47,7 @@ class MainActivity : AppCompatActivity() {
         mapController.setCenter(startPoint)
         Thread {
             val roadManager: RoadManager = OSRMRoadManager(this,"User")
+            (roadManager as OSRMRoadManager).setMean(OSRMRoadManager.MEAN_BY_FOOT)
             val waypoints = ArrayList<GeoPoint>()
             waypoints.add(startPoint)
             val endPoint = GeoPoint(43.7, 1.233)
@@ -63,12 +66,17 @@ class MainActivity : AppCompatActivity() {
                 val node = road.mNodes[i]
                 val nodeMarker = Marker(map)
                 nodeMarker.setPosition(node.mLocation)
-                nodeMarker.setIcon(nodeIcon)
-                nodeMarker.setTitle("Step $i")
+                nodeMarker.icon = nodeIcon
+                nodeMarker.title = "Step $i"
+                nodeMarker.snippet = node.mInstructions
+
+                nodeMarker.subDescription = Road.getLengthDurationText(this,node.mLength,node.mDuration)
                 map.overlays.add(nodeMarker)
             }
+
             map.invalidate()
         }.start()
+
 
 
     }
