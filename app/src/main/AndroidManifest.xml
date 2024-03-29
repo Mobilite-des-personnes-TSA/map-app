@@ -17,9 +17,9 @@
             android:exported="false"
             android:theme="@style/Theme.MyApplication" />
         <activity
-            android:name=".ChoixDest"
+            android:name=".SecondFragment"
             android:exported="false"
-            android:label="@string/title_activity_choix_dest" />
+            android:label="@string/title_activity_fragment_second" />
         <activity
             android:name=".UISettings"
             android:exported="false"
