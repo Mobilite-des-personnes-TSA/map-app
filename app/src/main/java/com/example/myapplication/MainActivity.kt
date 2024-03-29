@@ -1,7 +1,9 @@
 package com.example.myapplication
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
+import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -20,6 +22,7 @@ import org.osmdroid.views.overlay.Polyline
 class MainActivity : AppCompatActivity() {
     private val requestPermissionRequestCode = 1
     private lateinit var map: MapView
+    private lateinit var button: Button
     @SuppressLint("UseCompatLoadingForDrawables")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,6 +75,12 @@ class MainActivity : AppCompatActivity() {
 
                 nodeMarker.subDescription = Road.getLengthDurationText(this,node.mLength,node.mDuration)
                 map.overlays.add(nodeMarker)
+            }
+
+            button = findViewById(R.id.button)
+            button.setOnClickListener {
+                val intent = Intent(this, JourneyPlanner::class.java)
+                startActivity(intent)
             }
 
             map.invalidate()
