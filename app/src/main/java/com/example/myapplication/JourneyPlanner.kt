@@ -1,41 +1,26 @@
 package com.example.myapplication
 
 import android.os.Bundle
-import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
-import androidx.navigation.findNavController
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.navigateUp
-import androidx.navigation.ui.setupActionBarWithNavController
-import com.example.myapplication.databinding.ActivityJourneyPlannerBinding
+import androidx.preference.PreferenceFragmentCompat
 
 class JourneyPlanner : AppCompatActivity() {
 
-    private lateinit var appBarConfiguration: AppBarConfiguration
-    private lateinit var binding: ActivityJourneyPlannerBinding
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        binding = ActivityJourneyPlannerBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
-      //  setSupportActionBar(binding.toolbar)
-
-        val navController = findNavController(R.id.nav_host_fragment_content_journey_planner)
-        appBarConfiguration = AppBarConfiguration(navController.graph)
-        setupActionBarWithNavController(navController, appBarConfiguration)
-
-      /*  binding.fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null)
-                .setAnchorView(R.id.fab).show()
-        }*/
+        setContentView(R.layout.activity_journey_planner)
+        if (savedInstanceState == null) {
+            supportFragmentManager
+                .beginTransaction()
+                //          .replace(R.id.settings, SettingsFragment())
+                .commit()
+        }
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
 
-    override fun onSupportNavigateUp(): Boolean {
-        val navController = findNavController(R.id.nav_host_fragment_content_journey_planner)
-        return navController.navigateUp(appBarConfiguration)
-                || super.onSupportNavigateUp()
+    class SettingsFragment : PreferenceFragmentCompat() {
+        override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+            setPreferencesFromResource(R.xml.root_preferences, rootKey)
+        }
     }
 }
