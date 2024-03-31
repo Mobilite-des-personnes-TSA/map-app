@@ -24,4 +24,6 @@
     <string name="attachment_summary_off">Only download attachments when manually requested</string>
     <string name="title_activity_choix_dest">ChoixDest</string>
     <string name="button">Button</string>
+    <string name="trajet">Trajet</string>
+    <string name="param_tre">Paramètre</string>
 </resources>

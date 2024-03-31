@@ -23,6 +23,7 @@ class MainActivity : AppCompatActivity() {
     private val requestPermissionRequestCode = 1
     private lateinit var map: MapView
     private lateinit var button: Button
+    private lateinit var buttonSettigs: Button
     @SuppressLint("UseCompatLoadingForDrawables")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -77,9 +78,15 @@ class MainActivity : AppCompatActivity() {
                 map.overlays.add(nodeMarker)
             }
 
-            button = findViewById(R.id.button)
+            button = findViewById(R.id.button_journy)
             button.setOnClickListener {
                 val intent = Intent(this, JourneyPlanner::class.java)
+                startActivity(intent)
+            }
+
+            buttonSettigs = findViewById(R.id.button_settings)
+            buttonSettigs.setOnClickListener {
+                val intent = Intent(this, SettingsActivity::class.java)
                 startActivity(intent)
             }
 
