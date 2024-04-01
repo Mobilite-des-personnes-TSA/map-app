@@ -29,7 +29,8 @@
         </activity>
         <activity
             android:name=".JourneyPlanner"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/Theme.Material3.Light.NoActionBar" />
         <activity
             android:name=".SettingsActivity"
             android:exported="false"
