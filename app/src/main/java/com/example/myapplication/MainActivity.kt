@@ -84,20 +84,22 @@ class MainActivity : AppCompatActivity() {
                 map.overlays.add(nodeMarker)
             }
 
-            button = findViewById(R.id.button_journy)
-            button.setOnClickListener {
-                val intent = Intent(this, JourneyPlanner::class.java)
-                startActivity(intent)
-            }
-
-            buttonSettigs = findViewById(R.id.button_settings)
-            buttonSettigs.setOnClickListener {
-                val intent = Intent(this, SettingsActivity::class.java)
-                startActivity(intent)
-            }
-
             map.invalidate()
         }.start()
+
+
+
+        button = findViewById(R.id.button_journy)
+        button.setOnClickListener {
+            val intent = Intent(this, JourneyPlanner::class.java)
+            startActivity(intent)
+        }
+
+        buttonSettigs = findViewById(R.id.button_settings)
+        buttonSettigs.setOnClickListener {
+            val intent = Intent(this, SettingsActivity::class.java)
+            startActivity(intent)
+        }
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.topView)) { view, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
