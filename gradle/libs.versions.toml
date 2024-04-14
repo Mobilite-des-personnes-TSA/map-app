@@ -1,5 +1,6 @@
 [versions]
-agp = "8.3.1"
+agp = "8.3.2"
+httpclient = "4.5.14"
 kotlin = "1.9.0"
 coreKtx = "1.12.0"
 junit = "4.13.2"
@@ -16,6 +17,7 @@ preferenceKtx = "1.2.1"
 preference = "1.2.1"
 
 [libraries]
+httpclient = { module = "org.apache.httpcomponents:httpclient", version.ref = "httpclient" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-preference-ktx = { module = "androidx.preference:preference-ktx", version.ref = "preferenceKtx" }
