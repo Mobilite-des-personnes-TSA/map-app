@@ -1,10 +1,10 @@
-package tisseo;
+package com.example.myapplication;
 
 import static org.junit.Assert.*;
 
-import org.junit.Test;
+import com.example.myapplication.tisseo.TisseoApiClient;
 
-import java.io.IOException;
+import org.junit.Test;
 
 public class TisseoApiClientTest {
     // Doc Tisséo : https://data.toulouse-metropole.fr/explore/dataset/api-temps-reel-tisseo/files/72b8051dbf567762260cfa66baf8c333/download/

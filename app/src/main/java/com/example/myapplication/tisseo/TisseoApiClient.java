@@ -1,4 +1,4 @@
-package tisseo;
+package com.example.myapplication.tisseo;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
