@@ -1,5 +1,7 @@
 package com.example.myapplication.tisseo;
 
+import static com.example.myapplication.tisseo.TisseoKeyKt.API_KEY;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -15,7 +17,6 @@ import java.io.IOException;
 public class TisseoApiClient {
 
     private static final String ENTRY_POINT = "https://api.tisseo.fr/v2/";
-    private static final String API_KEY = "API_KEY";
 
     private HttpClient httpClient;
 
