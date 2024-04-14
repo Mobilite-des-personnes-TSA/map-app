@@ -1,40 +1,47 @@
 package com.example.myapplication.tisseo
 
-import android.content.Context
+import android.net.Uri
 import android.util.Log
+import kotlinx.serialization.DeserializationStrategy
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.json.Json
 import java.io.BufferedInputStream
 import java.io.IOException
 import java.net.URL
 import javax.net.ssl.HttpsURLConnection
 
 
-class TisseoApiClient {
+object TisseoApiClient {
+    private val apiEntryUri =
+        Uri.Builder().scheme("https").authority("api.tisseo.fr").appendPath("v2")
+            .appendQueryParameter("key", API_KEY).build()
 
-    private fun executeGetRequest(service: String, parameters: Map<String, String>): String? {
-        val urlBuilder = StringBuilder(ENTRY_POINT)
-            .append(service).append(".json?key=").append(API_KEY)
-        parameters.forEach { (k, v) -> urlBuilder.append("&").append(k).append("=").append(v) }
-        Log.d("TisseoApiClient", "URL: $urlBuilder")
-        val connection = URL(urlBuilder.toString()).openConnection() as HttpsURLConnection
+    private fun <T> executeGetRequest(deserializer: DeserializationStrategy<T>, uri: Uri): T? {
+        Log.d("TisseoApiClient", "Request: $uri")
+        val connection = URL(uri.toString()).openConnection() as HttpsURLConnection
         val result = try {
-            connection.requestMethod = "GET"
-            connection.connect()
-            BufferedInputStream(connection.inputStream).bufferedReader()
-                .use { it.readText() }
+            BufferedInputStream(connection.inputStream).bufferedReader().use { it.readText() }
         } catch (e: IOException) {
+            Log.wtf("TisseoApiClient", e.message, e)
             null
         } finally {
             connection.disconnect()
         }
         Log.d("TisseoApiClient", "Result: $result")
-        return result
+        return result?.let { Json.decodeFromString(deserializer, it) }
     }
 
-    fun apiAutocomplete(parameter: String) = executeGetRequest(
-        "places", mapOf("term" to parameter)
+
+    @ExperimentalSerializationApi
+    fun places(
+        term: String, lang: String = "fr"
+    ) = executeGetRequest(
+        PlacesResponse.serializer(),
+        apiEntryUri.buildUpon().appendPath("places.json").appendQueryParameter("term", term)
+            .appendQueryParameter("lang", lang).build()
     )
 
-    fun apiJourney(
+    fun journey(
         departurePlace: String,
         arrivalPlace: String,
         roadMode: String,
@@ -42,18 +49,12 @@ class TisseoApiClient {
         displayWording: String = "1",
         lang: String = "fr"
     ) = executeGetRequest(
-        "journeys",
-        mapOf(
-            "departurePlace" to departurePlace,
-            "arrivalPlace" to arrivalPlace,
-            "roadMode" to roadMode,
-            "number" to number,
-            "displayWording" to displayWording,
-            "lang" to lang
-        )
+        JourneyResponse.serializer(),
+        apiEntryUri.buildUpon().appendPath("journeys.json")
+            .appendQueryParameter("departurePlace", departurePlace)
+            .appendQueryParameter("arrivalPlace", arrivalPlace)
+            .appendQueryParameter("roadMode", roadMode).appendQueryParameter("number", number)
+            .appendQueryParameter("displayWording", displayWording)
+            .appendQueryParameter("lang", lang).build()
     )
-
-    companion object {
-        private const val ENTRY_POINT = "https://api.tisseo.fr/v2/"
-    }
 }
