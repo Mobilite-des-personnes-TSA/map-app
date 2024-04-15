@@ -279,6 +279,9 @@ data class JourneyResponse(
 
                     @Serializable
                     data class Street(
+                        val arrivalTime:String,
+                        val departureTime:String,
+                        val duration: String,
                         val length: String,
                         val wkt: String,
                         val roadMode: String,
@@ -359,7 +362,7 @@ data class JourneyResponse(
                                 val bgXmlColor: String,
                                 val fgXmlColor: String,
                                 val transportMode: Line.TransportMode,
-                                val message: List<Line.Message>,
+                                val message: List<Line.Message>? =null,
                                 @SerialName("service_number") val serviceNumber: String,
                                 val specificPricing: String,
                                 val style: String
