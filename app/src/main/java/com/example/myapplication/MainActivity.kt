@@ -174,6 +174,7 @@ class MainActivity : AppCompatActivity() {
         }.start()
     }
 
+    @SuppressLint("UseCompatLoadingForDrawables")
     fun drawJourney(road:Road){
         val roadOverlay: Polyline = RoadManager.buildRoadOverlay(road)
         map.overlays.add(roadOverlay)
