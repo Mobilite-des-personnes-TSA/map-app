@@ -12,6 +12,7 @@ import com.example.myapplication.tisseo.TisseoApiClient
 import org.osmdroid.bonuspack.routing.OSRMRoadManager
 import org.osmdroid.bonuspack.routing.Road
 import org.osmdroid.bonuspack.routing.RoadManager
+import org.osmdroid.bonuspack.routing.RoadNode
 import org.osmdroid.config.Configuration.getInstance
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
@@ -37,7 +38,7 @@ class MainActivity : AppCompatActivity() {
         val startPoint = GeoPoint(43.6, 1.4333)
         mapController.setCenter(startPoint)
         Thread {
-            tisseoRouting("aerodrome", "balma")
+            tisseoRouting("17 avenue de lespinet", "francois verdier")
         }.start()
         button = findViewById(R.id.button)
         button.setOnClickListener {
@@ -89,29 +90,58 @@ class MainActivity : AppCompatActivity() {
     private fun tisseoRouting(startPlace:String, endPlace:String){
         Thread{
         val journeyData = TisseoApiClient.journey(startPlace,endPlace,"walk","1")
-        val geoPoints = ArrayList<GeoPoint>()
+        val road = Road()
         if (journeyData != null) {
             journeyData.routePlannerResult.journeys[0].journey.chunks.forEach{chunk ->
 
                 if (chunk.service != null){
                     val wkt = chunk.service.wkt
                     val coordinates = wkt.substringAfter("(").substringBeforeLast(")").split(",")
-
-                    // Pour chaque paire de coordonnées, extrayez la latitude et la longitude et ajoutez-les à la liste de points
+                    val roadNode = RoadNode()
+                    roadNode.mInstructions = chunk.service.text?.text
+                    val (long, lat) = coordinates[0].trim().split(" ")
+                    val units = chunk.service.duration.split(":".toRegex()).dropLastWhile { it.isEmpty() }
+                        .toTypedArray()
+                    val duration = 3600 * units[0].toInt() +60 * units[1].toInt() + units[2].toInt()
+                    roadNode.mDuration = duration.toDouble()
+                    roadNode.mLocation = GeoPoint(lat.toDouble(),long.toDouble())
+                    road.mNodes.add(roadNode)
                     coordinates.forEach { coordinate ->
                         val (longitude, latitude) = coordinate.trim().split(" ")
-                        geoPoints.add(GeoPoint(latitude.toDouble(), longitude.toDouble()))
+                        road.mRouteHigh.add(GeoPoint(latitude.toDouble(),longitude.toDouble()))
+                    }
+                } else if(chunk.street != null){
+                    val wkt = chunk.street.wkt
+                    val roadNode = RoadNode()
+                    roadNode.mInstructions = chunk.street.text.text
+                    val units = chunk.street.duration.split(":".toRegex()).dropLastWhile { it.isEmpty() }
+                        .toTypedArray()
+                    val duration = 3600 * units[0].toInt() +60 * units[1].toInt() + units[2].toInt()
+                    roadNode.mDuration = duration.toDouble()
+                    roadNode.mLength = chunk.street.length.toDouble()/1000
+                    roadNode.mLocation = GeoPoint(chunk.street.startAddress.connectionPlace.latitude.toDouble(),chunk.street.startAddress.connectionPlace.longitude.toDouble())
+                    road.mNodes.add(roadNode)
+                    val intermediateCoordinates = wkt.substringAfter("(")
+                    val coordinates:List<String> = if(intermediateCoordinates[0] == '('){
+                        wkt.substringAfter("((").substringBeforeLast("))").split(",")
+                    }else{
+                        wkt.substringAfter("(").substringBeforeLast(")").split(",")
+                    }
+
+                    coordinates.forEach{coordinate ->
+                        val (longitude,latitude) = coordinate.trim().split(" ")
+                        road.mRouteHigh.add(GeoPoint(latitude.toDouble(),longitude.toDouble()))
+
                     }
                 }
             }
         }
-        val road = Road()
-        geoPoints.forEach { point -> road.mRouteHigh.add(point)
-        }
-            println("Points de la route ajoutés:")
-            road.mRouteHigh.forEachIndexed { index, geoPoint ->
-                println("Point $index : Latitude = ${geoPoint.latitude}, Longitude = ${geoPoint.longitude}")
-            }
+
+
+        /*println("Points de la route ajoutés:")
+        road.mRouteHigh.forEachIndexed { index, geoPoint ->
+            println("Point $index : Latitude = ${geoPoint.latitude}, Longitude = ${geoPoint.longitude}")
+        }*/
         drawJourney(road)
         map.invalidate()
         }.start()
