@@ -52,4 +52,10 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    // Kotlin Coroutines
+    implementation(libs.kotlinx.coroutines.android)
+    // Kotlin Flow
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.android.v152)
+
 }

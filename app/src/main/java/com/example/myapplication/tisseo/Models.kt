@@ -15,6 +15,16 @@ import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeFormatterBuilder
 
 
+/** What info should we keep ?
+ *  Keep Tisséo API only for publice transportation ?
+ *  We dont need to keep track of the places, we only need the coordinates and the actual road
+ *  Keep translating coordinates into places to the API
+ *
+ *  We need :
+ *      Journeys
+ *      Places (list of things ?)
+ *      Lines ?
+ */
 object LocalDateTimeSerializer : KSerializer<LocalDateTime> {
     private val ISO_LOCAL_DATE_TIME =
         DateTimeFormatterBuilder().parseCaseInsensitive().append(DateTimeFormatter.ISO_LOCAL_DATE)
