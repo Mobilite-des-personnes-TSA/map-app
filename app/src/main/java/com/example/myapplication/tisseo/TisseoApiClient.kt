@@ -2,6 +2,7 @@ package com.example.myapplication.tisseo
 
 import android.net.Uri
 import android.util.Log
+import com.example.myapplication.BuildConfig
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
@@ -14,7 +15,7 @@ import javax.net.ssl.HttpsURLConnection
 object TisseoApiClient {
     private val apiEntryUri =
         Uri.Builder().scheme("https").authority("api.tisseo.fr").appendPath("v2")
-            .appendQueryParameter("key", API_KEY).build()
+            .appendQueryParameter("key", BuildConfig.TISSEO_API_KEY).build()
 
     private fun <T> executeGetRequest(deserializer: DeserializationStrategy<T>, uri: Uri): T? {
         Log.d("TisseoApiClient", "Request: $uri")
