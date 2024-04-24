@@ -99,14 +99,14 @@ object TisseoApiClient {
         arrivalPlace: String,
         roadMode: String,
         number: String,
+        dispatcher: CoroutineDispatcher,              //   Do I keep this as a dependency ?
         displayWording: String = "1",
-        lang: String = "fr",
-        dispatcher: CoroutineDispatcher              //   Do I keep this as a dependency ?
+        lang: String = "fr"
     ) = executeGetRequest(
             JourneyResponse.serializer(),
             apiEntryUri.buildUpon().appendPath("journeys.json")
                 .appendQueryParameter("departurePlace", departurePlace)
-                .appendQueryParameter("arrivalPlace", arrivalPlace)
+                .appendQueryParameter("arrivalPla   ce", arrivalPlace)
                 .appendQueryParameter("roadMode", roadMode).appendQueryParameter("number", number)
                 .appendQueryParameter("displayWording", displayWording)
                 .appendQueryParameter("lang", lang).build(),
