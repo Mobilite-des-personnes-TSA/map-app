@@ -54,23 +54,23 @@ class JourneyPlanner : AppCompatActivity() {
     )
 
 
-    private suspend fun TisseoRouting (startPlace:String, endPlace:String, roadMode:String){
+    private suspend fun TisseoRouting (startPlace:String, endPlace:String, roadMode:String,dispatcher: CoroutineDispatcher){
         val file =ArrayList<RoadNodeForRouting>();
         file.clear();
 
         val roadNode = RoadNode();
-        val geoPoint = AdddresseToGeoPoint(startPlace);
+        val geoPoint = AdddresseToGeoPoint(startPlace,dispatcher);
         roadNode.mDuration = 0.0;
         roadNode.mLocation = GeoPoint(geoPoint.latitude,geoPoint.longitude);
         val road = Road();
         road.mNodes.add(roadNode)
 
-        var node = RoadNodeForRouting(road, Heuristique(startPlace, endPlace, roadMode));
+        var node = RoadNodeForRouting(road, Heuristique(startPlace, endPlace, roadMode, dispatcher));
         file.add(node);
 
-        while(road.mNodes[road.mNodes.size].mLocation.equals(AdddresseToGeoPoint(endPlace))){
+        while(road.mNodes[road.mNodes.size].mLocation.equals(AdddresseToGeoPoint(endPlace,dispatcher))){
             node = SelectBest(file);
-            ARouting(GeoPointToAddresse(road.mNodes[road.mNodes.size].mLocation), endPlace, roadMode, file);
+            ARouting(GeoPointToAddresse(road.mNodes[road.mNodes.size].mLocation,dispatcher), endPlace, roadMode, file, dispatcher);
         }
 
     }
@@ -96,14 +96,14 @@ class JourneyPlanner : AppCompatActivity() {
         return out;
     }
 
-    private suspend fun ARouting(startPlace:String, endPlace:String, roadMode:String, file : ArrayList<RoadNodeForRouting>){
+    private suspend fun ARouting(startPlace:String, endPlace:String, roadMode:String, file : ArrayList<RoadNodeForRouting>, dispatcher: CoroutineDispatcher){
         val journeyData = TisseoApiClient.journey(startPlace,endPlace,roadMode,"4", Dispatchers.Unconfined);
 
         for(i in 0..3){
             val road = JourneyToRoad(journeyData!!.routePlannerResult.journeys[i].journey);
 
             val littleRoad = LittleRoadNotGood(road);
-            val heuristic = Heuristique(littleRoad.mNodes[littleRoad.mNodes.size].mLocation.toString(), endPlace, roadMode);
+            val heuristic = Heuristique(littleRoad.mNodes[littleRoad.mNodes.size].mLocation.toString(), endPlace, roadMode, dispatcher);
             val cout = Cout(littleRoad);
 
             val node = RoadNodeForRouting(littleRoad, (heuristic+cout));
@@ -165,9 +165,9 @@ class JourneyPlanner : AppCompatActivity() {
         return false;
     }
 
-    private fun Heuristique (startPlace:String, endPlace:String, roadMode:String): Double {
-        val start = AdddresseToGeoPoint(startPlace);
-        val end = AdddresseToGeoPoint(endPlace);
+    private suspend fun Heuristique (startPlace:String, endPlace:String, roadMode:String, dispatcher: CoroutineDispatcher): Double {
+        val start = AdddresseToGeoPoint(startPlace,dispatcher);
+        val end = AdddresseToGeoPoint(endPlace,dispatcher);
 
         return (start.longitude - end.longitude).pow(2.0) + (start.latitude - end.latitude).pow(2.0);
     }
