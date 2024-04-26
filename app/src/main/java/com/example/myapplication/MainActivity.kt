@@ -37,8 +37,15 @@ class MainActivity : AppCompatActivity() {
         mapController.setZoom(13.0)
         val startPoint = GeoPoint(43.6, 1.4333)
         mapController.setCenter(startPoint)
+        val bundle = intent.extras
+        val departureAddress = bundle?.getString("Departure")
+        val arrivalAddress = bundle?.getString("Arrival")
+
         Thread {
-            tisseoRouting("17 avenue de lespinet", "francois verdier")
+            if (departureAddress != null && arrivalAddress != null) {
+                    tisseoRouting(departureAddress, arrivalAddress)
+
+            }
         }.start()
         button = findViewById(R.id.button)
         button.setOnClickListener {
@@ -92,7 +99,7 @@ class MainActivity : AppCompatActivity() {
         val journeyData = TisseoApiClient.journey(startPlace,endPlace,"walk","1")
         val road = Road()
         if (journeyData != null) {
-            journeyData.routePlannerResult.journeys[0].journey.chunks.forEach{chunk ->
+            journeyData.routePlannerResult.journeys[0].journey.chunks.forEach{ chunk ->
 
                 if (chunk.service != null){
                     val wkt = chunk.service.wkt
