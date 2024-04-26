@@ -37,14 +37,11 @@ class MainActivity : AppCompatActivity() {
         map.setTileSource(TileSourceFactory.MAPNIK)
         val mapController = map.controller
         mapController.setZoom(13.0)
-        val startPoint = GeoPoint(43.6, 1.4333)
-        mapController.setCenter(startPoint)
-        val bundle = intent.extras
-        val departureAddress = bundle?.getString("Departure")
-        val arrivalAddress = bundle?.getString("Arrival")
+        val startCenterPoint = GeoPoint(43.6, 1.4333)
+        mapController.setCenter(startCenterPoint)
 
         button = findViewById(R.id.button)
-        button.setOnClickListener(this::openJorneyPlanner)
+        button.setOnClickListener(this::openJourneyPlanner)
 
 
     }
@@ -190,6 +187,7 @@ class MainActivity : AppCompatActivity() {
 
     fun drawJourney(road: Road) {
         val roadOverlay: Polyline = RoadManager.buildRoadOverlay(road)
+        map.overlays.clear()
         map.overlays.add(roadOverlay)
         val nodeIcon = resources.getDrawable(R.drawable.marker_node, theme)
         for (i in road.mNodes.indices) {
@@ -206,12 +204,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun openJorneyPlanner(view: View) {
+    private fun openJourneyPlanner(view: View) {
         val intent = Intent(this, JourneyPlanner::class.java)
-        resultJorneyPlanner.launch(intent)
+        resultJourneyPlanner.launch(intent)
     }
 
-    private var resultJorneyPlanner =
+    private var resultJourneyPlanner =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
                 result.data?.also {
