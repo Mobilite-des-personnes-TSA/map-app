@@ -8,6 +8,12 @@ import android.widget.Button
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.enableEdgeToEdge
+import android.view.ViewGroup
+import androidx.core.app.ActivityCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import androidx.preference.PreferenceManager
 import com.example.myapplication.tisseo.TisseoApiClient
 import org.osmdroid.bonuspack.routing.OSRMRoadManager
@@ -26,8 +32,9 @@ class MainActivity : AppCompatActivity() {
     private val requestPermissionRequestCode = 1
     private lateinit var map: MapView
     private lateinit var button: Button
-
+    
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this))
         setContentView(R.layout.activity_main)
@@ -41,6 +48,20 @@ class MainActivity : AppCompatActivity() {
 
         button = findViewById(R.id.button)
         button.setOnClickListener(this::openJourneyPlanner)
+
+        buttonSettigs = findViewById(R.id.button_settings)
+        buttonSettigs.setOnClickListener {
+            val intent = Intent(this, SettingsActivity::class.java)
+            startActivity(intent)
+        }
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.topView)) { view, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                topMargin = insets.top
+            }
+            WindowInsetsCompat.CONSUMED
+        }
 
 
     }

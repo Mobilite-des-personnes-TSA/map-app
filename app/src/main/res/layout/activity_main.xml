@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
@@ -7,17 +8,49 @@
     <org.osmdroid.views.MapView
         android:id="@+id/map"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="0dp">
+        android:layout_height="match_parent"/>
 
-    </org.osmdroid.views.MapView>
-
-    <Button
-        android:id="@+id/button"
+    <androidx.cardview.widget.CardView
+        android:id="@+id/topView"
         android:layout_width="match_parent"
-        android:layout_height="62dp"
-        android:layout_alignParentBottom="true"
-        android:text="@string/button" />
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginHorizontal="10dp"
+        app:cardCornerRadius="50dp"
+        app:cardElevation="10dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/button_journy"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_margin="0dp"
+                android:text="@string/trajet"
+                app:icon="@drawable/rounded_signpost_24" />
+
+            <View
+                android:id="@+id/divider"
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="?android:attr/listDivider" />
+
+            <Button
+                android:id="@+id/button_settings"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="0dp"
+                android:text="@string/title_activity_setting"
+                app:icon="@drawable/rounded_settings_24" />
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
 
 </RelativeLayout>
