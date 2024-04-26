@@ -75,12 +75,13 @@ object TisseoApiClient {
      */
     @ExperimentalSerializationApi
     suspend fun places(
-        term: String, lang: String = "fr",
+        term: String ="", coordinatesXY : String ="", lang: String = "fr",
         dispatcher: CoroutineDispatcher
     ) = executeGetRequest(
             PlacesResponse.serializer(),
             apiEntryUri.buildUpon().appendPath("places.json")
                 .appendQueryParameter("term", term)
+                .appendQueryParameter("coordinatesXY", coordinatesXY)
                 .appendQueryParameter("lang", lang)
                 .build(),
             dispatcher

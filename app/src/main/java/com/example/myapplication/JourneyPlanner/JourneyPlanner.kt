@@ -5,7 +5,9 @@ import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import com.example.myapplication.JourneyPlanner.JourneyPlannerViewModel
 import com.example.myapplication.tisseo.JourneyResponse
+import com.example.myapplication.tisseo.PlacesResponse
 import com.example.myapplication.tisseo.TisseoApiClient
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import org.osmdroid.bonuspack.routing.Road
 import org.osmdroid.bonuspack.routing.RoadNode
@@ -73,13 +75,14 @@ class JourneyPlanner : AppCompatActivity() {
 
     }
 
-    //TO DO
-    private fun AdddresseToGeoPoint(place : String) : GeoPoint {
-        return GeoPoint();
+    private suspend fun AdddresseToGeoPoint(place : String, dispatcher: CoroutineDispatcher) : GeoPoint {
+        val space = TisseoApiClient.places(place,"","fr" , dispatcher)?.placesList?.place?.get(0) as PlacesResponse.PlacesList.Place.PublicPlace;
+        return GeoPoint(space.x, space.y);
     }
 
-    private fun GeoPointToAddresse(place : GeoPoint) : String {
-        return "";
+    private suspend fun GeoPointToAddresse(place : GeoPoint, dispatcher: CoroutineDispatcher) : String {
+        val space = TisseoApiClient.places("",place.toString(),"fr" , dispatcher)?.placesList?.place?.get(0) as PlacesResponse.PlacesList.Place.PublicPlace;
+        return space.label;
     }
 
     private fun SelectBest(file : ArrayList<RoadNodeForRouting>) : RoadNodeForRouting {
