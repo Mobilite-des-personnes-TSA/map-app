@@ -23,7 +23,7 @@ class JourneyPlanner : AppCompatActivity() {
 
         button = findViewById(R.id.search)
         button.setOnClickListener {
-            val intent = Intent(this, JourneyPlanner::class.java)
+            val intent = Intent(this, MainActivity::class.java)
             val bundle = Bundle()
             edittext = findViewById(R.id.editTextText)
             bundle.putString("Departure",edittext.text.toString())
