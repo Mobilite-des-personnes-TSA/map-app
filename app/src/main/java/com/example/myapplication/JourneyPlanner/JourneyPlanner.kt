@@ -1,27 +1,16 @@
 package com.example.myapplication
 
-import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
-import androidx.preference.PreferenceFragmentCompat
 import com.example.myapplication.JourneyPlanner.JourneyPlannerViewModel
-import android.widget.Toast
-import androidx.core.app.ActivityCompat
-import androidx.preference.PreferenceManager
 import com.example.myapplication.tisseo.JourneyResponse
 import com.example.myapplication.tisseo.TisseoApiClient
 import kotlinx.coroutines.Dispatchers
-import org.osmdroid.bonuspack.routing.OSRMRoadManager
 import org.osmdroid.bonuspack.routing.Road
-import org.osmdroid.bonuspack.routing.RoadManager
 import org.osmdroid.bonuspack.routing.RoadNode
-import org.osmdroid.config.Configuration.getInstance
-import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
-import org.osmdroid.views.MapView
-import org.osmdroid.views.overlay.Marker
-import org.osmdroid.views.overlay.Polyline
+import java.lang.Math.pow
 
 
 /** TODO :
@@ -56,10 +45,66 @@ class JourneyPlanner : AppCompatActivity() {
 
     }
 
-    private suspend fun tisseoRouting(startPlace:String, endPlace:String){
-            val journeyData = TisseoApiClient.journey(startPlace,endPlace,"walk","1", Dispatchers.Unconfined)
+    data class RoadNodeForRouting(
+        val road: Road?,
+        val f: Double
+    )
 
 
+    private suspend fun TisseoRouting (startPlace:String, endPlace:String, roadMode:String){
+        val file =ArrayList<RoadNodeForRouting>();
+        file.clear();
+
+        val roadNode = RoadNode();
+        val geoPoint = AdddresseToGeoPoint(startPlace);
+        roadNode.mDuration = 0.0;
+        roadNode.mLocation = GeoPoint(geoPoint.latitude,geoPoint.longitude);
+        val road = Road();
+        road.mNodes.add(roadNode)
+
+        var node = RoadNodeForRouting(road, Heuristique(startPlace, endPlace, roadMode));
+        file.add(node);
+
+        while(road.mNodes.get(road.mNodes.size).mLocation.equals(AdddresseToGeoPoint(endPlace))){
+            node = SelectBest(file);
+            ARouting(GeoPointToAddresse(road.mNodes.get(road.mNodes.size).mLocation), endPlace, roadMode, file);
+        }
+
+    }
+
+    //TO DO
+    private fun AdddresseToGeoPoint(place : String) : GeoPoint {
+        return GeoPoint();
+    }
+
+    private fun GeoPointToAddresse(place : GeoPoint) : String {
+        return "";
+    }
+
+    private fun SelectBest(file : ArrayList<RoadNodeForRouting>) : RoadNodeForRouting {
+        var out = file.get(0);
+
+        for (node in file){
+            if (out.f > node.f){
+                out = node;
+            }
+        }
+        return out;
+    }
+
+    private suspend fun ARouting(startPlace:String, endPlace:String, roadMode:String, file : ArrayList<RoadNodeForRouting>){
+        val journeyData = TisseoApiClient.journey(startPlace,endPlace,roadMode,"4", Dispatchers.Unconfined);
+
+        for(i in 0..3){
+            val road = JourneyToRoad(journeyData!!.routePlannerResult.journeys[i].journey);
+
+            val littleRoad = LittleRoadNotGood(road);
+            val heuristic = Heuristique(littleRoad.mNodes.get(littleRoad.mNodes.size).mLocation.toString(), endPlace, roadMode);
+            val cout = Cout(littleRoad);
+
+            val node = RoadNodeForRouting(littleRoad, (heuristic+cout));
+            file.add(node);
+        }
     }
 
     private fun JourneyToRoad(journey :  JourneyResponse.RoutePlannerResult.JourneyItem.Journey ): Road {
@@ -110,6 +155,39 @@ class JourneyPlanner : AppCompatActivity() {
             }
 
         return road;
+    }
+
+    private fun NotGoodRoad(roadNode: RoadNode): Boolean {
+        return false;
+    }
+
+    private fun Heuristique (startPlace:String, endPlace:String, roadMode:String): Double {
+        val start = AdddresseToGeoPoint(startPlace);
+        val end = AdddresseToGeoPoint(endPlace);
+
+        return pow((start.longitude - end.longitude),2.0) + pow((start.latitude - end.latitude),2.0);
+    }
+
+    private fun Cout (road : Road): Double {
+        return road.mLength;
+    }
+
+
+    private fun LittleRoadNotGood (road: Road) : Road {
+        var sousRoad = Road ();
+        var valide = true;
+        var index = 0
+
+        while(valide && index < road.mNodes.size){
+            if (NotGoodRoad(road.mNodes[index])){
+                valide=false;
+            } else{
+                sousRoad.mNodes.add(road.mNodes[index]);
+                index++;
+            }
+        }
+
+        return sousRoad;
     }
 
 }
