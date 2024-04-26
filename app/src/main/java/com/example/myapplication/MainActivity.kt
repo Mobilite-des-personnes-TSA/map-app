@@ -1,10 +1,12 @@
 package com.example.myapplication
 
-import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.preference.PreferenceManager
@@ -25,7 +27,7 @@ class MainActivity : AppCompatActivity() {
     private val requestPermissionRequestCode = 1
     private lateinit var map: MapView
     private lateinit var button: Button
-    @SuppressLint("UseCompatLoadingForDrawables")
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this))
@@ -41,17 +43,8 @@ class MainActivity : AppCompatActivity() {
         val departureAddress = bundle?.getString("Departure")
         val arrivalAddress = bundle?.getString("Arrival")
 
-        Thread {
-            if (departureAddress != null && arrivalAddress != null) {
-                    tisseoRouting(departureAddress, arrivalAddress)
-
-            }
-        }.start()
         button = findViewById(R.id.button)
-        button.setOnClickListener {
-            val intent = Intent(this, JourneyPlanner::class.java)
-            startActivity(intent)
-        }
+        button.setOnClickListener(this::openJorneyPlanner)
 
 
     }
@@ -94,76 +87,90 @@ class MainActivity : AppCompatActivity() {
             )
         }
     }
-    private fun tisseoRouting(startPlace:String, endPlace:String){
-        Thread{
-        val journeyData = TisseoApiClient.journey(startPlace,endPlace,"walk","1")
-        val road = Road()
-        if (journeyData != null) {
-            journeyData.routePlannerResult.journeys[0].journey.chunks.forEach{ chunk ->
 
-                if (chunk.service != null){
-                    val wkt = chunk.service.wkt
-                    val coordinates = wkt.substringAfter("(").substringBeforeLast(")").split(",")
-                    val roadNode = RoadNode()
-                    roadNode.mInstructions = chunk.service.text?.text
-                    val (long, lat) = coordinates[0].trim().split(" ")
-                    val units = chunk.service.duration.split(":".toRegex()).dropLastWhile { it.isEmpty() }
-                        .toTypedArray()
-                    val duration = 3600 * units[0].toInt() +60 * units[1].toInt() + units[2].toInt()
-                    roadNode.mDuration = duration.toDouble()
-                    roadNode.mLocation = GeoPoint(lat.toDouble(),long.toDouble())
-                    road.mNodes.add(roadNode)
-                    coordinates.forEach { coordinate ->
-                        val (longitude, latitude) = coordinate.trim().split(" ")
-                        road.mRouteHigh.add(GeoPoint(latitude.toDouble(),longitude.toDouble()))
-                    }
-                } else if(chunk.street != null){
-                    val wkt = chunk.street.wkt
-                    val roadNode = RoadNode()
-                    roadNode.mInstructions = chunk.street.text.text
-                    val units = chunk.street.duration.split(":".toRegex()).dropLastWhile { it.isEmpty() }
-                        .toTypedArray()
-                    val duration = 3600 * units[0].toInt() +60 * units[1].toInt() + units[2].toInt()
-                    roadNode.mDuration = duration.toDouble()
-                    roadNode.mLength = chunk.street.length.toDouble()/1000
-                    roadNode.mLocation = GeoPoint(chunk.street.startAddress.connectionPlace.latitude.toDouble(),chunk.street.startAddress.connectionPlace.longitude.toDouble())
-                    road.mNodes.add(roadNode)
-                    val intermediateCoordinates = wkt.substringAfter("(")
-                    val coordinates:List<String> = if(intermediateCoordinates[0] == '('){
-                        wkt.substringAfter("((").substringBeforeLast("))").split(",")
-                    }else{
-                        wkt.substringAfter("(").substringBeforeLast(")").split(",")
-                    }
+    private fun tisseoRouting(startPlace: String, endPlace: String) {
+        Thread {
+            val journeyData = TisseoApiClient.journey(startPlace, endPlace, "walk", "1")
+            val road = Road()
+            if (journeyData != null) {
+                journeyData.routePlannerResult.journeys[0].journey.chunks.forEach { chunk ->
 
-                    coordinates.forEach{coordinate ->
-                        val (longitude,latitude) = coordinate.trim().split(" ")
-                        road.mRouteHigh.add(GeoPoint(latitude.toDouble(),longitude.toDouble()))
+                    if (chunk.service != null) {
+                        val wkt = chunk.service.wkt
+                        val coordinates =
+                            wkt.substringAfter("(").substringBeforeLast(")").split(",")
+                        val roadNode = RoadNode()
+                        roadNode.mInstructions = chunk.service.text?.text
+                        val (long, lat) = coordinates[0].trim().split(" ")
+                        val units = chunk.service.duration.split(":".toRegex())
+                            .dropLastWhile { it.isEmpty() }
+                            .toTypedArray()
+                        val duration =
+                            3600 * units[0].toInt() + 60 * units[1].toInt() + units[2].toInt()
+                        roadNode.mDuration = duration.toDouble()
+                        roadNode.mLocation = GeoPoint(lat.toDouble(), long.toDouble())
+                        road.mNodes.add(roadNode)
+                        coordinates.forEach { coordinate ->
+                            val (longitude, latitude) = coordinate.trim().split(" ")
+                            road.mRouteHigh.add(GeoPoint(latitude.toDouble(), longitude.toDouble()))
+                        }
+                    } else if (chunk.street != null) {
+                        val wkt = chunk.street.wkt
+                        val roadNode = RoadNode()
+                        roadNode.mInstructions = chunk.street.text.text
+                        val units = chunk.street.duration.split(":".toRegex())
+                            .dropLastWhile { it.isEmpty() }
+                            .toTypedArray()
+                        val duration =
+                            3600 * units[0].toInt() + 60 * units[1].toInt() + units[2].toInt()
+                        roadNode.mDuration = duration.toDouble()
+                        roadNode.mLength = chunk.street.length.toDouble() / 1000
+                        roadNode.mLocation = GeoPoint(
+                            chunk.street.startAddress.connectionPlace.latitude.toDouble(),
+                            chunk.street.startAddress.connectionPlace.longitude.toDouble()
+                        )
+                        road.mNodes.add(roadNode)
+                        val intermediateCoordinates = wkt.substringAfter("(")
+                        val coordinates: List<String> = if (intermediateCoordinates[0] == '(') {
+                            wkt.substringAfter("((").substringBeforeLast("))").split(",")
+                        } else {
+                            wkt.substringAfter("(").substringBeforeLast(")").split(",")
+                        }
 
+                        coordinates.forEach { coordinate ->
+                            val (longitude, latitude) = coordinate.trim().split(" ")
+                            road.mRouteHigh.add(GeoPoint(latitude.toDouble(), longitude.toDouble()))
+
+                        }
                     }
                 }
             }
-        }
 
 
-        /*println("Points de la route ajoutés:")
-        road.mRouteHigh.forEachIndexed { index, geoPoint ->
-            println("Point $index : Latitude = ${geoPoint.latitude}, Longitude = ${geoPoint.longitude}")
-        }*/
-        drawJourney(road)
-        map.invalidate()
+            /*println("Points de la route ajoutés:")
+            road.mRouteHigh.forEachIndexed { index, geoPoint ->
+                println("Point $index : Latitude = ${geoPoint.latitude}, Longitude = ${geoPoint.longitude}")
+            }*/
+            drawJourney(road)
+            map.invalidate()
         }.start()
     }
-    fun osrmRouting(startPoint:GeoPoint,endPoint: GeoPoint,mode:String){
+
+    fun osrmRouting(startPoint: GeoPoint, endPoint: GeoPoint, mode: String) {
         Thread {
-            val roadManager: RoadManager = OSRMRoadManager(this,"User")
+            val roadManager: RoadManager = OSRMRoadManager(this, "User")
             when (mode) {
                 "bike" -> {
                     (roadManager as OSRMRoadManager).setMean(OSRMRoadManager.MEAN_BY_BIKE)
                 }
+
                 "car" -> {
                     (roadManager as OSRMRoadManager).setMean(OSRMRoadManager.MEAN_BY_CAR)
                 }
-                else -> {(roadManager as OSRMRoadManager).setMean(OSRMRoadManager.MEAN_BY_FOOT)}
+
+                else -> {
+                    (roadManager as OSRMRoadManager).setMean(OSRMRoadManager.MEAN_BY_FOOT)
+                }
             }
 
             val waypoints = ArrayList<GeoPoint>()
@@ -181,11 +188,10 @@ class MainActivity : AppCompatActivity() {
         }.start()
     }
 
-    @SuppressLint("UseCompatLoadingForDrawables")
-    fun drawJourney(road:Road){
+    fun drawJourney(road: Road) {
         val roadOverlay: Polyline = RoadManager.buildRoadOverlay(road)
         map.overlays.add(roadOverlay)
-        val nodeIcon = resources.getDrawable(R.drawable.marker_node,theme)
+        val nodeIcon = resources.getDrawable(R.drawable.marker_node, theme)
         for (i in road.mNodes.indices) {
             val node = road.mNodes[i]
             val nodeMarker = Marker(map)
@@ -194,9 +200,28 @@ class MainActivity : AppCompatActivity() {
             nodeMarker.title = "Step $i"
             nodeMarker.snippet = node.mInstructions
 
-            nodeMarker.subDescription = Road.getLengthDurationText(this,node.mLength,node.mDuration)
+            nodeMarker.subDescription =
+                Road.getLengthDurationText(this, node.mLength, node.mDuration)
             map.overlays.add(nodeMarker)
         }
     }
 
+    private fun openJorneyPlanner(view: View) {
+        val intent = Intent(this, JourneyPlanner::class.java)
+        resultJorneyPlanner.launch(intent)
+    }
+
+    private var resultJorneyPlanner =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                result.data?.also {
+                    it.getStringExtra("Departure")?.also { departureAddress ->
+                        it.getStringExtra("Arrival")?.also { arrivalAddress ->
+                            tisseoRouting(departureAddress, arrivalAddress)
+                        }
+                    }
+                }
+            }
+
+        }
 }
