@@ -11,6 +11,7 @@ import org.osmdroid.bonuspack.routing.Road
 import org.osmdroid.bonuspack.routing.RoadNode
 import org.osmdroid.util.GeoPoint
 import java.lang.Math.pow
+import kotlin.math.pow
 
 
 /** TODO :
@@ -65,9 +66,9 @@ class JourneyPlanner : AppCompatActivity() {
         var node = RoadNodeForRouting(road, Heuristique(startPlace, endPlace, roadMode));
         file.add(node);
 
-        while(road.mNodes.get(road.mNodes.size).mLocation.equals(AdddresseToGeoPoint(endPlace))){
+        while(road.mNodes[road.mNodes.size].mLocation.equals(AdddresseToGeoPoint(endPlace))){
             node = SelectBest(file);
-            ARouting(GeoPointToAddresse(road.mNodes.get(road.mNodes.size).mLocation), endPlace, roadMode, file);
+            ARouting(GeoPointToAddresse(road.mNodes[road.mNodes.size].mLocation), endPlace, roadMode, file);
         }
 
     }
@@ -82,7 +83,7 @@ class JourneyPlanner : AppCompatActivity() {
     }
 
     private fun SelectBest(file : ArrayList<RoadNodeForRouting>) : RoadNodeForRouting {
-        var out = file.get(0);
+        var out = file[0];
 
         for (node in file){
             if (out.f > node.f){
@@ -99,7 +100,7 @@ class JourneyPlanner : AppCompatActivity() {
             val road = JourneyToRoad(journeyData!!.routePlannerResult.journeys[i].journey);
 
             val littleRoad = LittleRoadNotGood(road);
-            val heuristic = Heuristique(littleRoad.mNodes.get(littleRoad.mNodes.size).mLocation.toString(), endPlace, roadMode);
+            val heuristic = Heuristique(littleRoad.mNodes[littleRoad.mNodes.size].mLocation.toString(), endPlace, roadMode);
             val cout = Cout(littleRoad);
 
             val node = RoadNodeForRouting(littleRoad, (heuristic+cout));
@@ -165,7 +166,7 @@ class JourneyPlanner : AppCompatActivity() {
         val start = AdddresseToGeoPoint(startPlace);
         val end = AdddresseToGeoPoint(endPlace);
 
-        return pow((start.longitude - end.longitude),2.0) + pow((start.latitude - end.latitude),2.0);
+        return (start.longitude - end.longitude).pow(2.0) + (start.latitude - end.latitude).pow(2.0);
     }
 
     private fun Cout (road : Road): Double {
@@ -174,7 +175,7 @@ class JourneyPlanner : AppCompatActivity() {
 
 
     private fun LittleRoadNotGood (road: Road) : Road {
-        var sousRoad = Road ();
+        val sousRoad = Road ();
         var valide = true;
         var index = 0
 
