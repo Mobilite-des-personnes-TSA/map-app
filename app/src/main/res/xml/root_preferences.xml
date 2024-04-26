@@ -1,65 +1,27 @@
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory app:title="@string/messages_header">
+    <PreferenceCategory
+        app:title="Sensibilité"
+        app:summary="Les éléments de la ville que je veux éviter.">
 
-        <EditTextPreference
-            app:key="signature"
-            app:title="@string/signature_title"
-            app:useSimpleSummaryProvider="true" />
+        <SwitchPreferenceCompat
+            app:key="noise"
+            app:title="Nuisances sonores"
+            app:summaryOn="Le bruit me dérange."
+            app:summaryOff="Le bruit ne me dérange pas."/>
 
-        <ListPreference
-            app:defaultValue="reply"
-            app:entries="@array/reply_entries"
-            app:entryValues="@array/reply_values"
-            app:key="reply"
-            app:title="@string/reply_title"
-            app:useSimpleSummaryProvider="true" />
+
+        <SwitchPreferenceCompat
+            app:key="crowd"
+            app:title="Foule"
+            app:summaryOn="Je n'aime pas lorsque il y a trop de monde."
+            app:summaryOff="Lorsqu'il y a trop de monde, ce n'est pas un problème."/>
+
+        <SwitchPreferenceCompat
+            app:key="light"
+            app:title="Zone lumineuse"
+            app:summaryOn="Je veut évité la lumière."
+            app:summaryOff="La lumière ne me dérange pas."/>
 
     </PreferenceCategory>
-
-    <PreferenceCategory app:title="@string/sync_header">
-
-        <SwitchPreferenceCompat
-            app:key="sync"
-            app:title="@string/sync_title" />
-
-        <SwitchPreferenceCompat
-            app:dependency="sync"
-            app:key="attachment"
-            app:summaryOff="@string/attachment_summary_off"
-            app:summaryOn="@string/attachment_summary_on"
-            app:title="@string/attachment_title" />
-
-    </PreferenceCategory><PreferenceCategory
-        app:title="@string/messages_header">
-
-        <EditTextPreference
-            app:key="signature"
-            app:title="@string/signature_title"
-            app:useSimpleSummaryProvider="true"/>
-
-        <ListPreference
-            app:key="reply"
-            app:title="@string/reply_title"
-            app:entries="@array/reply_entries"
-            app:entryValues="@array/reply_values"
-            app:defaultValue="reply"
-            app:useSimpleSummaryProvider="true"/>
-
-    </PreferenceCategory><PreferenceCategory
-        app:title="@string/sync_header">
-
-        <SwitchPreferenceCompat
-            app:key="sync"
-            app:title="@string/sync_title"/>
-
-        <SwitchPreferenceCompat
-            app:key="attachment"
-            app:title="@string/attachment_title"
-            app:summaryOn="@string/attachment_summary_on"
-            app:summaryOff="@string/attachment_summary_off"
-            app:dependency="sync"/>
-
-    </PreferenceCategory>
-
 </PreferenceScreen>

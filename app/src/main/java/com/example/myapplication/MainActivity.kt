@@ -3,10 +3,15 @@ package com.example.myapplication
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.view.ViewGroup
 import android.widget.Button
 import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import androidx.preference.PreferenceManager
 import org.osmdroid.bonuspack.routing.OSRMRoadManager
 import org.osmdroid.bonuspack.routing.Road
@@ -23,8 +28,10 @@ class MainActivity : AppCompatActivity() {
     private val requestPermissionRequestCode = 1
     private lateinit var map: MapView
     private lateinit var button: Button
+    private lateinit var buttonSettigs: Button
     @SuppressLint("UseCompatLoadingForDrawables")
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
         //handle permissions first, before map is created. not depicted here
@@ -77,15 +84,30 @@ class MainActivity : AppCompatActivity() {
                 map.overlays.add(nodeMarker)
             }
 
-            button = findViewById(R.id.button)
-            button.setOnClickListener {
-                val intent = Intent(this, JourneyPlanner::class.java)
-                startActivity(intent)
-            }
-
             map.invalidate()
         }.start()
 
+
+
+        button = findViewById(R.id.button_journy)
+        button.setOnClickListener {
+            val intent = Intent(this, JourneyPlanner::class.java)
+            startActivity(intent)
+        }
+
+        buttonSettigs = findViewById(R.id.button_settings)
+        buttonSettigs.setOnClickListener {
+            val intent = Intent(this, SettingsActivity::class.java)
+            startActivity(intent)
+        }
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.topView)) { view, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                topMargin = insets.top
+            }
+            WindowInsetsCompat.CONSUMED
+        }
 
 
     }
