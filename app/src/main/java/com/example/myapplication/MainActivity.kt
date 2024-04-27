@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -32,7 +31,6 @@ import kotlin.math.pow
 
 
 class MainActivity : AppCompatActivity() {
-    private val requestPermissionRequestCode = 1
     private lateinit var map: MapView
     private lateinit var buttonJourneyPlanner: Button
     private lateinit var buttonSettings: Button
@@ -138,7 +136,7 @@ class MainActivity : AppCompatActivity() {
 
     @OptIn(ExperimentalSerializationApi::class)
     private fun addressToGeoPoint(place : String) : GeoPoint {
-        val space = TisseoApiClient.places(place,"","fr" )?.placesList?.place?.get(0) as PlacesResponse.PlacesList.Place.PublicPlace
+        val space = TisseoApiClient.places(place,"","fr" )?.placesList?.place?.get(0)!!
         return GeoPoint(space.x, space.y)
     }
 
@@ -308,7 +306,9 @@ class MainActivity : AppCompatActivity() {
                 result.data?.also {
                     it.getStringExtra("Departure")?.also { departureAddress ->
                         it.getStringExtra("Arrival")?.also { arrivalAddress ->
-                            tisseoRouting(departureAddress, arrivalAddress, "walk")
+                            Thread {
+                                tisseoRouting(departureAddress, arrivalAddress, "walk")
+                            }.start()
                         }
                     }
                 }
