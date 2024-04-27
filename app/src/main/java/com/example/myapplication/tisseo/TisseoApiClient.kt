@@ -3,6 +3,7 @@ package com.example.myapplication.tisseo
 import android.net.Uri
 import android.util.Log
 import com.example.myapplication.BuildConfig
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
@@ -35,12 +36,16 @@ object TisseoApiClient {
 
     @ExperimentalSerializationApi
     fun places(
-        term: String, lang: String = "fr"
+        term: String ="", coordinatesXY : String ="", lang: String = "fr",
     ) = executeGetRequest(
         PlacesResponse.serializer(),
-        apiEntryUri.buildUpon().appendPath("places.json").appendQueryParameter("term", term)
-            .appendQueryParameter("lang", lang).build()
+        apiEntryUri.buildUpon().appendPath("places.json")
+            .appendQueryParameter("term", term)
+            .appendQueryParameter("coordinatesXY", coordinatesXY)
+            .appendQueryParameter("lang", lang)
+            .build(),
     )
+
 
     fun journey(
         departurePlace: String,
