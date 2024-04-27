@@ -1,6 +1,15 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
+    alias(libs.plugins.jetbrainsKotlinSerialization)
+}
+
+
+val props = Properties()
+project.rootProject.file("local.properties").let { f ->
+    if (f.exists()) props.load(f.inputStream())
 }
 
 android {
@@ -9,18 +18,25 @@ android {
 
     defaultConfig {
         applicationId = "com.example.myapplication"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "TISSEO_API_KEY",
+            "\"${System.getenv("TISSEO_API_KEY") ?: props.getProperty("TISSEO_API_KEY")!!}\""
+        )
     }
 
     buildTypes {
         release {
             isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
     compileOptions {
@@ -32,14 +48,15 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        buildConfig = true
     }
     buildToolsVersion = "34.0.0"
 }
 
 dependencies {
-    implementation (libs.osmbonuspack)
+    implementation(libs.osmbonuspack)
     implementation(libs.androidx.preference.ktx)
-    implementation (libs.osmdroid.android)
+    implementation(libs.osmdroid.android)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -47,6 +64,7 @@ dependencies {
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.androidx.preference)
+    implementation(libs.kotlinx.serialization.json)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
