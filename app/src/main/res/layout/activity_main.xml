@@ -26,7 +26,7 @@
             android:orientation="horizontal">
 
             <Button
-                android:id="@+id/button_journy"
+                android:id="@+id/button_journey_planner"
                 style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"

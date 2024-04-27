@@ -4,11 +4,13 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Button
+import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.activity.enableEdgeToEdge
-import android.view.ViewGroup
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
@@ -32,9 +34,8 @@ import kotlin.math.pow
 class MainActivity : AppCompatActivity() {
     private val requestPermissionRequestCode = 1
     private lateinit var map: MapView
-    private lateinit var button: Button
-    private lateinit var buttonSettigs: Button
-
+    private lateinit var buttonJourneyPlanner: Button
+    private lateinit var buttonSettings: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -49,11 +50,11 @@ class MainActivity : AppCompatActivity() {
         val startCenterPoint = GeoPoint(43.6, 1.4333)
         mapController.setCenter(startCenterPoint)
 
-        button = findViewById(R.id.button_journy)
-        button.setOnClickListener(this::openJourneyPlanner)
+        buttonJourneyPlanner = findViewById(R.id.button_journey_planner)
+        buttonJourneyPlanner.setOnClickListener(this::openJourneyPlanner)
 
-        buttonSettigs = findViewById(R.id.button_settings)
-        buttonSettigs.setOnClickListener {
+        buttonSettings = findViewById(R.id.button_settings)
+        buttonSettings.setOnClickListener {
             val intent = Intent(this, SettingsActivity::class.java)
             startActivity(intent)
         }
@@ -66,7 +67,6 @@ class MainActivity : AppCompatActivity() {
             WindowInsetsCompat.CONSUMED
         }
 
-        tisseoRouting("Métro Rangueil Toulouse", "Place du capitol Toulouse", "walk")
 
     }
 
@@ -278,11 +278,11 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    fun drawJourney(road: Road) {
+    private fun drawJourney(road: Road) {
         val roadOverlay: Polyline = RoadManager.buildRoadOverlay(road)
         map.overlays.clear()
         map.overlays.add(roadOverlay)
-        val nodeIcon = resources.getDrawable(R.drawable.marker_node, theme)
+        val nodeIcon = ResourcesCompat.getDrawable(resources, R.drawable.marker_node, theme)
         for (i in road.mNodes.indices) {
             val node = road.mNodes[i]
             val nodeMarker = Marker(map)
@@ -297,7 +297,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun openJourneyPlanner(view: View) {
+    private fun openJourneyPlanner(@Suppress("UNUSED_PARAMETER") view: View) {
         val intent = Intent(this, JourneyPlanner::class.java)
         resultJourneyPlanner.launch(intent)
     }
