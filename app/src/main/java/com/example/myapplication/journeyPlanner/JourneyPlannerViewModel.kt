@@ -1,4 +1,4 @@
-package com.example.myapplication.JourneyPlanner
+package com.example.myapplication.journeyPlanner
 
 class JourneyPlannerViewModel {
 

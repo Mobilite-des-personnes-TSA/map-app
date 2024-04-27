@@ -1,9 +1,8 @@
-package com.example.myapplication
+package com.example.myapplication.journeyPlanner
 
 import android.os.Bundle
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
-import com.example.myapplication.JourneyPlanner.JourneyPlannerViewModel
 import com.example.myapplication.tisseo.JourneyResponse
 import com.example.myapplication.tisseo.PlacesResponse
 import com.example.myapplication.tisseo.TisseoApiClient
@@ -12,7 +11,6 @@ import kotlinx.coroutines.Dispatchers
 import org.osmdroid.bonuspack.routing.Road
 import org.osmdroid.bonuspack.routing.RoadNode
 import org.osmdroid.util.GeoPoint
-import java.lang.Math.pow
 import kotlin.math.pow
 
 
@@ -27,7 +25,6 @@ import kotlin.math.pow
 class JourneyPlanner : AppCompatActivity() {
 
     private lateinit var button: Button
-    private lateinit var viewModel : JourneyPlannerViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,69 +46,69 @@ class JourneyPlanner : AppCompatActivity() {
     }
 
     data class RoadNodeForRouting(
-        val road: Road?,
+        val road: Road,
         val f: Double
     )
 
 
-    private suspend fun TisseoRouting (startPlace:String, endPlace:String, roadMode:String,dispatcher: CoroutineDispatcher){
-        val file =ArrayList<RoadNodeForRouting>();
-        file.clear();
+    private suspend fun tisseoRouting (startPlace:String, endPlace:String, roadMode:String, dispatcher: CoroutineDispatcher){
+        val file =ArrayList<RoadNodeForRouting>()
+        file.clear()
 
-        val roadNode = RoadNode();
-        val geoPoint = AdddresseToGeoPoint(startPlace,dispatcher);
-        roadNode.mDuration = 0.0;
-        roadNode.mLocation = GeoPoint(geoPoint.latitude,geoPoint.longitude);
-        val road = Road();
+        val roadNode = RoadNode()
+        val geoPoint = adddresseToGeoPoint(startPlace,dispatcher)
+        roadNode.mDuration = 0.0
+        roadNode.mLocation = GeoPoint(geoPoint.latitude,geoPoint.longitude)
+        val road = Road()
         road.mNodes.add(roadNode)
 
-        var node = RoadNodeForRouting(road, Heuristique(startPlace, endPlace, roadMode, dispatcher));
-        file.add(node);
+        var node = RoadNodeForRouting(road, heuristique(startPlace, endPlace, roadMode, dispatcher))
+        file.add(node)
 
-        while(road.mNodes[road.mNodes.size].mLocation.equals(AdddresseToGeoPoint(endPlace,dispatcher))){
-            node = SelectBest(file);
-            ARouting(GeoPointToAddresse(road.mNodes[road.mNodes.size].mLocation,dispatcher), endPlace, roadMode, file, dispatcher);
+        while(road.mNodes[road.mNodes.size].mLocation.equals(adddresseToGeoPoint(endPlace,dispatcher))){
+            node = selectBest(file)
+            aRouting(geoPointToAddresse(node.road.mNodes[node.road.mNodes.size].mLocation,dispatcher), endPlace, roadMode, file, dispatcher)
         }
 
     }
 
-    private suspend fun AdddresseToGeoPoint(place : String, dispatcher: CoroutineDispatcher) : GeoPoint {
-        val space = TisseoApiClient.places(place,"","fr" , dispatcher)?.placesList?.place?.get(0) as PlacesResponse.PlacesList.Place.PublicPlace;
-        return GeoPoint(space.x, space.y);
+    private suspend fun adddresseToGeoPoint(place : String, dispatcher: CoroutineDispatcher) : GeoPoint {
+        val space = TisseoApiClient.places(place,"","fr" , dispatcher)?.placesList?.place?.get(0) as PlacesResponse.PlacesList.Place.PublicPlace
+        return GeoPoint(space.x, space.y)
     }
 
-    private suspend fun GeoPointToAddresse(place : GeoPoint, dispatcher: CoroutineDispatcher) : String {
-        val space = TisseoApiClient.places("",place.toString(),"fr" , dispatcher)?.placesList?.place?.get(0) as PlacesResponse.PlacesList.Place.PublicPlace;
-        return space.label;
+    private suspend fun geoPointToAddresse(place : GeoPoint, dispatcher: CoroutineDispatcher) : String {
+        val space = TisseoApiClient.places("",place.toString(),"fr" , dispatcher)?.placesList?.place?.get(0) as PlacesResponse.PlacesList.Place.PublicPlace
+        return space.label
     }
 
-    private fun SelectBest(file : ArrayList<RoadNodeForRouting>) : RoadNodeForRouting {
-        var out = file[0];
+    private fun selectBest(file : ArrayList<RoadNodeForRouting>) : RoadNodeForRouting {
+        var out = file[0]
 
         for (node in file){
             if (out.f > node.f){
-                out = node;
+                out = node
             }
         }
-        return out;
+        return out
     }
 
-    private suspend fun ARouting(startPlace:String, endPlace:String, roadMode:String, file : ArrayList<RoadNodeForRouting>, dispatcher: CoroutineDispatcher){
-        val journeyData = TisseoApiClient.journey(startPlace,endPlace,roadMode,"4", Dispatchers.Unconfined);
+    private suspend fun aRouting(startPlace:String, endPlace:String, roadMode:String, file : ArrayList<RoadNodeForRouting>, dispatcher: CoroutineDispatcher){
+        val journeyData = TisseoApiClient.journey(startPlace,endPlace,roadMode,"4", Dispatchers.Unconfined)
 
         for(i in 0..3){
-            val road = JourneyToRoad(journeyData!!.routePlannerResult.journeys[i].journey);
+            val road = journeyToRoad(journeyData!!.routePlannerResult.journeys[i].journey)
 
-            val littleRoad = LittleRoadNotGood(road);
-            val heuristic = Heuristique(littleRoad.mNodes[littleRoad.mNodes.size].mLocation.toString(), endPlace, roadMode, dispatcher);
-            val cout = Cout(littleRoad);
+            val littleRoad = littleRoadNotGood(road)
+            val heuristic = heuristique(littleRoad.mNodes[littleRoad.mNodes.size].mLocation.toString(), endPlace, roadMode, dispatcher)
+            val cout = cout(littleRoad)
 
-            val node = RoadNodeForRouting(littleRoad, (heuristic+cout));
-            file.add(node);
+            val node = RoadNodeForRouting(littleRoad, (heuristic+cout))
+            file.add(node)
         }
     }
 
-    private fun JourneyToRoad(journey :  JourneyResponse.RoutePlannerResult.JourneyItem.Journey ): Road {
+    private fun journeyToRoad(journey :  JourneyResponse.RoutePlannerResult.JourneyItem.Journey ): Road {
         val road = Road()
 
             journey.chunks.forEach{chunk ->
@@ -158,40 +155,40 @@ class JourneyPlanner : AppCompatActivity() {
                 }
             }
 
-        return road;
+        return road
     }
 
-    private fun NotGoodRoad(roadNode: RoadNode): Boolean {
-        return false;
+    private fun impossibleRoad(roadNode: RoadNode): Boolean {
+        return false
     }
 
-    private suspend fun Heuristique (startPlace:String, endPlace:String, roadMode:String, dispatcher: CoroutineDispatcher): Double {
-        val start = AdddresseToGeoPoint(startPlace,dispatcher);
-        val end = AdddresseToGeoPoint(endPlace,dispatcher);
+    private suspend fun heuristique (startPlace:String, endPlace:String, roadMode:String, dispatcher: CoroutineDispatcher): Double {
+        val start = adddresseToGeoPoint(startPlace,dispatcher)
+        val end = adddresseToGeoPoint(endPlace,dispatcher)
 
-        return (start.longitude - end.longitude).pow(2.0) + (start.latitude - end.latitude).pow(2.0);
+        return (start.longitude - end.longitude).pow(2.0) + (start.latitude - end.latitude).pow(2.0)
     }
 
-    private fun Cout (road : Road): Double {
-        return road.mLength;
+    private fun cout (road : Road): Double {
+        return road.mLength
     }
 
 
-    private fun LittleRoadNotGood (road: Road) : Road {
-        val sousRoad = Road ();
-        var valide = true;
+    private fun littleRoadNotGood (road: Road) : Road {
+        val sousRoad = Road ()
+        var valide = true
         var index = 0
 
         while(valide && index < road.mNodes.size){
-            if (NotGoodRoad(road.mNodes[index])){
-                valide=false;
+            if (impossibleRoad(road.mNodes[index])){
+                valide=false
             } else{
-                sousRoad.mNodes.add(road.mNodes[index]);
-                index++;
+                sousRoad.mNodes.add(road.mNodes[index])
+                index++
             }
         }
 
-        return sousRoad;
+        return sousRoad
     }
 
 }
