@@ -32,7 +32,9 @@ class MainActivity : AppCompatActivity() {
     private val requestPermissionRequestCode = 1
     private lateinit var map: MapView
     private lateinit var button: Button
-    
+    private lateinit var buttonSettigs: Button
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
@@ -46,7 +48,7 @@ class MainActivity : AppCompatActivity() {
         val startCenterPoint = GeoPoint(43.6, 1.4333)
         mapController.setCenter(startCenterPoint)
 
-        button = findViewById(R.id.button)
+        button = findViewById(R.id.button_journy)
         button.setOnClickListener(this::openJourneyPlanner)
 
         buttonSettigs = findViewById(R.id.button_settings)
@@ -152,37 +154,6 @@ class MainActivity : AppCompatActivity() {
         }.start()
     }
 
-    fun osrmRouting(startPoint: GeoPoint, endPoint: GeoPoint, mode: String) {
-        Thread {
-            val roadManager: RoadManager = OSRMRoadManager(this, "User")
-            when (mode) {
-                "bike" -> {
-                    (roadManager as OSRMRoadManager).setMean(OSRMRoadManager.MEAN_BY_BIKE)
-                }
-
-                "car" -> {
-                    (roadManager as OSRMRoadManager).setMean(OSRMRoadManager.MEAN_BY_CAR)
-                }
-
-                else -> {
-                    (roadManager as OSRMRoadManager).setMean(OSRMRoadManager.MEAN_BY_FOOT)
-                }
-            }
-
-            val waypoints = ArrayList<GeoPoint>()
-            waypoints.add(startPoint)
-            waypoints.add(endPoint)
-            val road: Road = roadManager.getRoad(waypoints)
-            if (road.mStatus != Road.STATUS_OK) Toast.makeText(
-                this,
-                "Error when loading the road - status=" + road.mStatus,
-                Toast.LENGTH_SHORT
-            ).show()
-
-            drawJourney(road)
-            map.invalidate()
-        }.start()
-    }
 
     fun drawJourney(road: Road) {
         val roadOverlay: Polyline = RoadManager.buildRoadOverlay(road)
