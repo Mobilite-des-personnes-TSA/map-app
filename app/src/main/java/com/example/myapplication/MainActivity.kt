@@ -16,6 +16,7 @@ import androidx.preference.PreferenceManager
 import com.example.myapplication.tisseo.JourneyResponse
 import com.example.myapplication.tisseo.PlacesResponse
 import com.example.myapplication.tisseo.TisseoApiClient
+import kotlinx.serialization.ExperimentalSerializationApi
 import org.osmdroid.bonuspack.routing.Road
 import org.osmdroid.bonuspack.routing.RoadManager
 import org.osmdroid.bonuspack.routing.RoadNode
@@ -65,6 +66,7 @@ class MainActivity : AppCompatActivity() {
             WindowInsetsCompat.CONSUMED
         }
 
+        tisseoRouting("Métro Rangueil Toulouse", "Place du capitol Toulouse", "walk")
 
     }
 
@@ -134,11 +136,13 @@ class MainActivity : AppCompatActivity() {
         return out
     }
 
+    @OptIn(ExperimentalSerializationApi::class)
     private fun addressToGeoPoint(place : String) : GeoPoint {
         val space = TisseoApiClient.places(place,"","fr" )?.placesList?.place?.get(0) as PlacesResponse.PlacesList.Place.PublicPlace
         return GeoPoint(space.x, space.y)
     }
 
+    @OptIn(ExperimentalSerializationApi::class)
     private fun geoPointToAddress(place : GeoPoint) : String {
         val space = TisseoApiClient.places("",place.toString(),"fr" )?.placesList?.place?.get(0) as PlacesResponse.PlacesList.Place.PublicPlace
         return space.label
