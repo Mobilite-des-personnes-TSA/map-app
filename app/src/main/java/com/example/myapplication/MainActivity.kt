@@ -123,12 +123,16 @@ class MainActivity : AppCompatActivity() {
         var actual = lastNode
 
         while (father != null){
-            actual = father
-            father = actual.father
 
             for(littleRoad in actual.road.mNodes){
                out.mNodes.add(littleRoad)
             }
+            actual = father
+            father = actual.father
+        }
+
+        for(littleRoad in actual.road.mNodes){
+            out.mNodes.add(littleRoad)
         }
 
         return out
