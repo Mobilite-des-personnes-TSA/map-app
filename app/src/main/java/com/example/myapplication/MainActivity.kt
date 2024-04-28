@@ -3,6 +3,7 @@ package com.example.myapplication
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
@@ -98,23 +99,30 @@ class MainActivity : AppCompatActivity() {
         val file =ArrayList<RoadNodeForRouting>()
         file.clear()
 
+        val geoPointStart = addressToGeoPoint(startPlace)
+        val geoPointEnd = addressToGeoPoint(endPlace)
+
+
         val roadNode = RoadNode()
-        val geoPoint = addressToGeoPoint(startPlace)
         roadNode.mDuration = 0.0
-        roadNode.mLocation = GeoPoint(geoPoint.latitude,geoPoint.longitude)
+        roadNode.mLocation = GeoPoint(geoPointStart.latitude,geoPointStart.longitude)
 
         val road = Road()
         road.mNodes.add(roadNode)
 
-        var node = RoadNodeForRouting(road, heuristic(startPlace, endPlace, roadMode),0.0, null)
+        var node = RoadNodeForRouting(road, heuristic(geoPointStart, geoPointEnd, roadMode),0.0, null)
         file.add(node)
 
-        while(node.road.mNodes[node.road.mNodes.size].mLocation.equals(addressToGeoPoint(endPlace))){
+        while(lastLocation(node.road) != geoPointEnd){
             node = selectBest(file)
-            aRouting(geoPointToAddress(node.road.mNodes[node.road.mNodes.size].mLocation), endPlace, roadMode, node , file)
+            aRouting(lastLocation(node.road), geoPointEnd, roadMode, node , file)
         }
-
+        Log.d(Log.INFO.toString(), "On a trouve le chemin")
         drawJourney(regroupRoad(node))
+    }
+
+    private fun lastLocation(road: Road): GeoPoint {
+        return road.mNodes[road.mNodes.size-1].mLocation
     }
 
     private fun regroupRoad (lastNode :  RoadNodeForRouting) : Road {
@@ -123,7 +131,6 @@ class MainActivity : AppCompatActivity() {
         var actual = lastNode
 
         while (father != null){
-
             for(littleRoad in actual.road.mNodes){
                out.mNodes.add(littleRoad)
             }
@@ -134,7 +141,6 @@ class MainActivity : AppCompatActivity() {
         for(littleRoad in actual.road.mNodes){
             out.mNodes.add(littleRoad)
         }
-
         return out
     }
 
@@ -146,8 +152,12 @@ class MainActivity : AppCompatActivity() {
 
     @OptIn(ExperimentalSerializationApi::class)
     private fun geoPointToAddress(place : GeoPoint) : String {
-        val space = TisseoApiClient.places("",place.toString(),"fr" )?.placesList?.place?.get(0) as PlacesResponse.PlacesList.Place.PublicPlace
+        val space = TisseoApiClient.places("",printGeoPoint(place),"fr" )?.placesList?.place?.get(0) as PlacesResponse.PlacesList.Place.PublicPlace
         return space.label
+    }
+
+    private fun printGeoPoint(place: GeoPoint) : String {
+        return place.latitude.toString()+","+place.longitude.toString()
     }
 
     private fun selectBest(file : ArrayList<RoadNodeForRouting>) : RoadNodeForRouting {
@@ -164,9 +174,9 @@ class MainActivity : AppCompatActivity() {
     private fun keepTheBest(file : ArrayList<RoadNodeForRouting>, new  : RoadNodeForRouting){
         var index = 0
         var old = file[0].road
-        val locFinal = new.road.mNodes[new.road.mNodes.size].mLocation
+        val locFinal = lastLocation(new.road)
 
-        while(index < file.size && old.mNodes[old.mNodes.size].mLocation !=locFinal){
+        while(index < file.size && lastLocation(old) !=locFinal){
             old = file[index].road
             index ++
         }
@@ -181,14 +191,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun aRouting(startPlace:String, endPlace:String, roadMode:String, father : RoadNodeForRouting, file : ArrayList<RoadNodeForRouting>){
-        val journeyData = TisseoApiClient.journey(startPlace,endPlace,roadMode,"4")
+    private fun aRouting(startPlace:GeoPoint, endPlace:GeoPoint, roadMode:String, father : RoadNodeForRouting, file : ArrayList<RoadNodeForRouting>){
+        val journeyData = TisseoApiClient.journey(printGeoPoint(startPlace),printGeoPoint(endPlace),roadMode,"4")
 
         for(i in 0..3){
             val road = journeyToRoad(journeyData!!.routePlannerResult.journeys[i].journey)
 
             val littleRoad = goodPartOfRoad(road)
-            val heuristic = heuristic(littleRoad.mNodes[littleRoad.mNodes.size].mLocation.toString(), endPlace, roadMode)
+            val heuristic = heuristic(lastLocation(littleRoad), endPlace, roadMode)
             val price = price(littleRoad, father)
 
             val node = RoadNodeForRouting(littleRoad, heuristic, price, father)
@@ -250,10 +260,7 @@ class MainActivity : AppCompatActivity() {
         return false
     }
 
-    private fun heuristic (startPlace:String, endPlace:String, roadMode:String): Double {
-        val start = addressToGeoPoint(startPlace)
-        val end = addressToGeoPoint(endPlace)
-
+    private fun heuristic (start:GeoPoint, end:GeoPoint, roadMode:String): Double {
         return (start.longitude - end.longitude).pow(2.0) + (start.latitude - end.latitude).pow(2.0)
     }
 
