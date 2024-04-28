@@ -102,7 +102,6 @@ class MainActivity : AppCompatActivity() {
         val geoPointStart = addressToGeoPoint(startPlace)
         val geoPointEnd = addressToGeoPoint(endPlace)
 
-
         val roadNode = RoadNode()
         roadNode.mDuration = 0.0
         roadNode.mLocation = GeoPoint(geoPointStart.latitude,geoPointStart.longitude)
@@ -113,12 +112,12 @@ class MainActivity : AppCompatActivity() {
         var node = RoadNodeForRouting(road, heuristic(geoPointStart, geoPointEnd, roadMode),0.0, null)
         file.add(node)
 
-        while(lastLocation(node.road) != geoPointEnd){
+        var fini = false
+        while(!fini){
             node = selectBest(file)
-            aRouting(lastLocation(node.road), geoPointEnd, roadMode, node , file)
+            fini = aRouting(lastLocation(node.road), geoPointEnd, roadMode, node , file)
         }
         Log.d(Log.INFO.toString(), "On a trouve le chemin")
-        drawJourney(regroupRoad(node))
     }
 
     private fun lastLocation(road: Road): GeoPoint {
@@ -131,15 +130,15 @@ class MainActivity : AppCompatActivity() {
         var actual = lastNode
 
         while (father != null){
-            for(littleRoad in actual.road.mNodes){
-               out.mNodes.add(littleRoad)
+            for(index in 0..actual.road.mNodes.size-2){
+               out.mNodes.add(actual.road.mNodes[index])
             }
             actual = father
             father = actual.father
         }
 
-        for(littleRoad in actual.road.mNodes){
-            out.mNodes.add(littleRoad)
+        for(index in 0..actual.road.mNodes.size-2){
+            out.mNodes.add(actual.road.mNodes[index])
         }
         return out
     }
@@ -147,17 +146,18 @@ class MainActivity : AppCompatActivity() {
     @OptIn(ExperimentalSerializationApi::class)
     private fun addressToGeoPoint(place : String) : GeoPoint {
         val space = TisseoApiClient.places(place,"","fr" )?.placesList?.place?.get(0)!!
-        return GeoPoint(space.x, space.y)
+        return GeoPoint(space.y, space.x)
     }
 
+    // A ne pas utiliser y'a un problème avec l'api
     @OptIn(ExperimentalSerializationApi::class)
     private fun geoPointToAddress(place : GeoPoint) : String {
-        val space = TisseoApiClient.places("",printGeoPoint(place),"fr" )?.placesList?.place?.get(0) as PlacesResponse.PlacesList.Place.PublicPlace
+        val space = TisseoApiClient.places("",printGeoPointTisseo(place),"fr" )?.placesList?.place?.get(0) as PlacesResponse.PlacesList.Place.PublicPlace
         return space.label
     }
 
-    private fun printGeoPoint(place: GeoPoint) : String {
-        return place.latitude.toString()+","+place.longitude.toString()
+    private fun printGeoPointTisseo(place: GeoPoint) : String {
+        return place.longitude.toString()+","+place.latitude.toString()
     }
 
     private fun selectBest(file : ArrayList<RoadNodeForRouting>) : RoadNodeForRouting {
@@ -191,8 +191,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun aRouting(startPlace:GeoPoint, endPlace:GeoPoint, roadMode:String, father : RoadNodeForRouting, file : ArrayList<RoadNodeForRouting>){
-        val journeyData = TisseoApiClient.journey(printGeoPoint(startPlace),printGeoPoint(endPlace),roadMode,"4")
+    private fun aRouting(startPlace:GeoPoint, endPlace:GeoPoint, roadMode:String, father : RoadNodeForRouting, file : ArrayList<RoadNodeForRouting>) : Boolean{
+        val journeyData = TisseoApiClient.journey(printGeoPointTisseo(startPlace),printGeoPointTisseo(endPlace),roadMode,"4")
+        var fini = false
 
         for(i in 0..3){
             val road = journeyToRoad(journeyData!!.routePlannerResult.journeys[i].journey)
@@ -203,7 +204,13 @@ class MainActivity : AppCompatActivity() {
 
             val node = RoadNodeForRouting(littleRoad, heuristic, price, father)
             keepTheBest(file, node)
+
+            if(lastLocation(littleRoad) == lastLocation(road) && !fini){
+                fini = true
+                drawJourney(regroupRoad(node))
+            }
         }
+        return fini
     }
 
     private fun journeyToRoad(journey :  JourneyResponse.RoutePlannerResult.JourneyItem.Journey ): Road {
@@ -286,6 +293,9 @@ class MainActivity : AppCompatActivity() {
         return sousRoad
     }
 
+    private fun reverseCoord (geoPoint: GeoPoint) :GeoPoint {
+        return GeoPoint(geoPoint.longitude,geoPoint.latitude)
+    }
 
     private fun drawJourney(road: Road) {
         val roadOverlay: Polyline = RoadManager.buildRoadOverlay(road)
@@ -293,6 +303,8 @@ class MainActivity : AppCompatActivity() {
         map.overlays.add(roadOverlay)
         val nodeIcon = ResourcesCompat.getDrawable(resources, R.drawable.marker_node, theme)
         for (i in road.mNodes.indices) {
+            Log.d(1.toString(), "ajout à la map du point : latitude " + road.mNodes[i].mLocation.latitude + " longitude "+road.mNodes[i].mLocation.longitude)
+
             val node = road.mNodes[i]
             val nodeMarker = Marker(map)
             nodeMarker.setPosition(node.mLocation)
