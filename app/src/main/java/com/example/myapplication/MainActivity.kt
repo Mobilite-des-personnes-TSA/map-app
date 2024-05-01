@@ -130,8 +130,11 @@ class MainActivity : AppCompatActivity() {
         var actual = lastNode
 
         while (father != null){
-            for(index in 0..actual.road.mNodes.size-2){
+            for(index in 0..<actual.road.mNodes.size){
                out.mNodes.add(actual.road.mNodes[index])
+            }
+            for(index in 0..<actual.road.mRouteHigh.size){
+                out.mRouteHigh.add(actual.road.mRouteHigh[index])
             }
             actual = father
             father = actual.father
@@ -286,6 +289,18 @@ class MainActivity : AppCompatActivity() {
                 valide=false
             } else{
                 sousRoad.mNodes.add(road.mNodes[index])
+                index++
+            }
+        }
+
+        valide = true
+        index = 0
+        val lastGoodCoord = lastLocation(sousRoad)
+        while(valide && index < road.mRouteHigh.size){
+            if (road.mRouteHigh[index]==lastGoodCoord){
+                valide=false
+            } else{
+                sousRoad.mRouteHigh.add(road.mRouteHigh[index])
                 index++
             }
         }
