@@ -103,6 +103,17 @@ class MainActivity : AppCompatActivity() {
 
         aRouting(geoPointStart, geoPointEnd, roadMode, file)
         drawJourney(selectBest(file).road)
+
+        /*
+            TODO:
+            Il faut les buisness travel séparer + combos des deux
+            Décalage d'horraire de 10-15 min
+
+
+            les horraires sont passer par le main, debase le main passera la date actuel
+             -> rechercher une librairie
+                regarder l'API
+         */
     }
 
     private fun lastLocation(road: Road): GeoPoint {
