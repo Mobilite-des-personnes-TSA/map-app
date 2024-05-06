@@ -15,16 +15,6 @@ import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeFormatterBuilder
 
 
-/** What info should we keep ?
- *  Keep Tisséo API only for publice transportation ?
- *  We dont need to keep track of the places, we only need the coordinates and the actual road
- *  Keep translating coordinates into places to the API
- *
- *  We need :
- *      Journeys
- *      Places (list of things ?)
- *      Lines ?
- */
 object LocalDateTimeSerializer : KSerializer<LocalDateTime> {
     private val ISO_LOCAL_DATE_TIME =
         DateTimeFormatterBuilder().parseCaseInsensitive().append(DateTimeFormatter.ISO_LOCAL_DATE)
@@ -114,48 +104,57 @@ data class PlacesResponse(
         @SerialName("place")
         @JsonClassDiscriminator("className")
         sealed class Place {
+            abstract val id: String
+            abstract val label: String
+            abstract val category: String
+            abstract val key: String
+            abstract val x: Double
+            abstract val y: Double
+            abstract val rank: Int
+
             @Serializable
             @SerialName("stop")
             data class Stop(
-                val category: String,
-                val id: String,
-                val key: String,
-                val label: String,
+                override val category: String,
+                override val id: String,
+                override val key: String,
+                override val label: String,
                 val network: String,
-                val rank: Int,
-                val x: Double,
-                val y: Double
+                override val rank: Int,
+                override val x: Double,
+                override val y: Double
             ) : Place()
 
             @Serializable
             @SerialName("road")
             data class Road(
-                val id: String,
-                val label: String,
-                val category: String,
-                val key: String,
-                val x: Double,
-                val y: Double,
-                val rank: Int
+                override val id: String,
+                override val label: String,
+                override val category: String,
+                override val key: String,
+                override val x: Double,
+                override val y: Double,
+                override val rank: Int
             ) : Place()
 
             @Serializable
             @SerialName("public_place")
             data class PublicPlace(
-                val id: String,
-                val label: String,
+                override val id: String,
+                override val label: String,
                 val cityName: String? = null,
                 val postcode: String? = null,
                 val address: String? = null,
-                val key: String,
-                val category: String,
-                val x: Double,
-                val y: Double,
+                override val key: String,
+                override val category: String,
+                override val x: Double,
+                override val y: Double,
                 val typeCompressed: PublicPlaceType,
-                val rank: Int,
+                override val rank: Int,
                 val type: String? = null,
                 val code: String? = null,
-                @SerialName("veloStation") val bikeStation: Int? = null
+                @SerialName("veloStation") val bikeStation: Int? = null,
+                val autoStation: Int? = null
             ) : Place() {
                 @Serializable
                 enum class PublicPlaceType {
@@ -167,6 +166,9 @@ data class PlacesResponse(
 
                     @SerialName("c")
                     EDUCATION,
+
+                    @SerialName("cp")
+                    CHARGING_POINT,
 
                     @SerialName("d")
                     HOSPITAL,
@@ -242,13 +244,13 @@ data class PlacesResponse(
             @Serializable
             @SerialName("address")
             data class Address(
-                val id: String,
-                val label: String,
-                val category: String,
-                val key: String,
-                val x: Double,
-                val y: Double,
-                val rank: Int
+                override val id: String,
+                override val label: String,
+                override val category: String,
+                override val key: String,
+                override val x: Double,
+                override val y: Double,
+                override val rank: Int
             ) : Place()
         }
     }
