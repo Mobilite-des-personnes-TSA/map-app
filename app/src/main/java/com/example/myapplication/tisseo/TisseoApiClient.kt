@@ -6,6 +6,7 @@ import android.window.OnBackInvokedDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import com.example.myapplication.BuildConfig
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
@@ -37,7 +38,7 @@ object TisseoApiClient {
 
     private val apiEntryUri =
         Uri.Builder().scheme("https").authority("api.tisseo.fr").appendPath("v2")
-            .appendQueryParameter("key", API_KEY).build()
+            .appendQueryParameter("key", BuildConfig.TISSEO_API_KEY).build()
 
     /** TODO: Couroutine and flows
      *
@@ -78,14 +79,14 @@ object TisseoApiClient {
         term: String ="", coordinatesXY : String ="", lang: String = "fr",
         dispatcher: CoroutineDispatcher
     ) = executeGetRequest(
-            PlacesResponse.serializer(),
-            apiEntryUri.buildUpon().appendPath("places.json")
-                .appendQueryParameter("term", term)
-                .appendQueryParameter("coordinatesXY", coordinatesXY)
-                .appendQueryParameter("lang", lang)
-                .build(),
-            dispatcher
-        )
+        PlacesResponse.serializer(),
+        apiEntryUri.buildUpon().appendPath("places.json")
+            .appendQueryParameter("term", term)
+            .appendQueryParameter("coordinatesXY", coordinatesXY)
+            .appendQueryParameter("lang", lang)
+            .build(),
+        dispatcher
+    )
 
     /** Constructs a road for the given journey through the Tisséo API
      *  @param departurePlace
@@ -104,13 +105,14 @@ object TisseoApiClient {
         displayWording: String = "1",
         lang: String = "fr"
     ) = executeGetRequest(
-            JourneyResponse.serializer(),
-            apiEntryUri.buildUpon().appendPath("journeys.json")
-                .appendQueryParameter("departurePlace", departurePlace)
-                .appendQueryParameter("arrivalPla   ce", arrivalPlace)
-                .appendQueryParameter("roadMode", roadMode).appendQueryParameter("number", number)
-                .appendQueryParameter("displayWording", displayWording)
-                .appendQueryParameter("lang", lang).build(),
-            dispatcher
-        )
+        JourneyResponse.serializer(),
+        apiEntryUri.buildUpon().appendPath("journeys.json")
+            .appendQueryParameter("departurePlaceXY", departurePlace)
+            .appendQueryParameter("arrivalPlaceXY", arrivalPlace)
+            .appendQueryParameter("roadMode", roadMode).appendQueryParameter("number", number)
+            .appendQueryParameter("displayWording", displayWording)
+            .appendQueryParameter("lang", lang).build(),
+        dispatcher
+    )
+
 }
