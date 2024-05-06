@@ -89,9 +89,8 @@ class MainActivity : AppCompatActivity() {
 
     data class RoadNodeForRouting(
         val road: Road,
-        val h: Double,
-        val g: Double,
-        val father : RoadNodeForRouting?
+        val cost: Double,
+
     )
 
 
@@ -102,49 +101,14 @@ class MainActivity : AppCompatActivity() {
         val geoPointStart = addressToGeoPoint(startPlace)
         val geoPointEnd = addressToGeoPoint(endPlace)
 
-        val roadNode = RoadNode()
-        roadNode.mDuration = 0.0
-        roadNode.mLocation = GeoPoint(geoPointStart.latitude,geoPointStart.longitude)
-
-        val road = Road()
-        road.mNodes.add(roadNode)
-
-        var node = RoadNodeForRouting(road, heuristic(geoPointStart, geoPointEnd, roadMode),0.0, null)
-        file.add(node)
-
-        var fini = false
-        while(!fini){
-            node = selectBest(file)
-            fini = aRouting(lastLocation(node.road), geoPointEnd, roadMode, node , file)
-        }
-        Log.d(Log.INFO.toString(), "On a trouve le chemin")
+        aRouting(geoPointStart, geoPointEnd, roadMode, file)
+        drawJourney(selectBest(file).road)
     }
 
     private fun lastLocation(road: Road): GeoPoint {
         return road.mNodes[road.mNodes.size-1].mLocation
     }
 
-    private fun regroupRoad (lastNode :  RoadNodeForRouting) : Road {
-        val out = Road ()
-        var father = lastNode.father
-        var actual = lastNode
-
-        while (father != null){
-            for(index in 0..<actual.road.mNodes.size){
-               out.mNodes.add(actual.road.mNodes[index])
-            }
-            for(index in 0..<actual.road.mRouteHigh.size){
-                out.mRouteHigh.add(actual.road.mRouteHigh[index])
-            }
-            actual = father
-            father = actual.father
-        }
-
-        for(index in 0..actual.road.mNodes.size-2){
-            out.mNodes.add(actual.road.mNodes[index])
-        }
-        return out
-    }
 
     @OptIn(ExperimentalSerializationApi::class)
     private fun addressToGeoPoint(place : String) : GeoPoint {
@@ -152,12 +116,6 @@ class MainActivity : AppCompatActivity() {
         return GeoPoint(space.y, space.x)
     }
 
-    // A ne pas utiliser y'a un problème avec l'api
-    @OptIn(ExperimentalSerializationApi::class)
-    private fun geoPointToAddress(place : GeoPoint) : String {
-        val space = TisseoApiClient.places("",printGeoPointTisseo(place),"fr" )?.placesList?.place?.get(0) as PlacesResponse.PlacesList.Place.PublicPlace
-        return space.label
-    }
 
     private fun printGeoPointTisseo(place: GeoPoint) : String {
         return place.longitude.toString()+","+place.latitude.toString()
@@ -167,53 +125,25 @@ class MainActivity : AppCompatActivity() {
         var out = file[0]
 
         for (node in file){
-            if (out.g + out.h > node.g + node.h){
+            if (out.cost> node.cost){
                 out = node
             }
         }
         return out
     }
 
-    private fun keepTheBest(file : ArrayList<RoadNodeForRouting>, new  : RoadNodeForRouting){
-        var index = 0
-        var old = file[0].road
-        val locFinal = lastLocation(new.road)
 
-        while(index < file.size && lastLocation(old) !=locFinal){
-            old = file[index].road
-            index ++
-        }
-
-        if(index< file.size){
-            if(file[index].g > new.g){
-                file.removeAt(index)
-                file.add(new)
-            }
-        }else {
-            file.add(new)
-        }
-    }
-
-    private fun aRouting(startPlace:GeoPoint, endPlace:GeoPoint, roadMode:String, father : RoadNodeForRouting, file : ArrayList<RoadNodeForRouting>) : Boolean{
+    private fun aRouting(startPlace:GeoPoint, endPlace:GeoPoint, roadMode:String, file : ArrayList<RoadNodeForRouting>){
         val journeyData = TisseoApiClient.journey(printGeoPointTisseo(startPlace),printGeoPointTisseo(endPlace),roadMode,"4")
-        var fini = false
 
         for(i in 0..3){
             val road = journeyToRoad(journeyData!!.routePlannerResult.journeys[i].journey)
 
-            val littleRoad = goodPartOfRoad(road)
-            val heuristic = heuristic(lastLocation(littleRoad), endPlace, roadMode)
-            val price = price(littleRoad, father)
+            val price = price(road)
 
-            val node = RoadNodeForRouting(littleRoad, heuristic, price, father)
-            keepTheBest(file, node)
-
-            if(lastLocation(littleRoad) == lastLocation(road) && !fini){
-                fini = true
-                drawJourney(regroupRoad(node))
-            }
+            val node = RoadNodeForRouting(road, price)
+            file.add(node)
         }
-        return fini
     }
 
     private fun journeyToRoad(journey :  JourneyResponse.RoutePlannerResult.JourneyItem.Journey ): Road {
@@ -266,51 +196,12 @@ class MainActivity : AppCompatActivity() {
         return road
     }
 
-    private fun impossibleRoad(roadNode: RoadNode): Boolean {
-        return false
-    }
-
-    private fun heuristic (start:GeoPoint, end:GeoPoint, roadMode:String): Double {
-        return (start.longitude - end.longitude).pow(2.0) + (start.latitude - end.latitude).pow(2.0)
-    }
-
-    private fun price (road : Road, father : RoadNodeForRouting): Double {
-        return road.mLength + father.h
+    private fun price (road : Road): Double {
+        return road.mLength
     }
 
 
-    private fun goodPartOfRoad (road: Road) : Road {
-        val sousRoad = Road ()
-        var valide = true
-        var index = 0
 
-        while(valide && index < road.mNodes.size){
-            if (impossibleRoad(road.mNodes[index])){
-                valide=false
-            } else{
-                sousRoad.mNodes.add(road.mNodes[index])
-                index++
-            }
-        }
-
-        valide = true
-        index = 0
-        val lastGoodCoord = lastLocation(sousRoad)
-        while(valide && index < road.mRouteHigh.size){
-            if (road.mRouteHigh[index]==lastGoodCoord){
-                valide=false
-            } else{
-                sousRoad.mRouteHigh.add(road.mRouteHigh[index])
-                index++
-            }
-        }
-
-        return sousRoad
-    }
-
-    private fun reverseCoord (geoPoint: GeoPoint) :GeoPoint {
-        return GeoPoint(geoPoint.longitude,geoPoint.latitude)
-    }
 
     private fun drawJourney(road: Road) {
         val roadOverlay: Polyline = RoadManager.buildRoadOverlay(road)
