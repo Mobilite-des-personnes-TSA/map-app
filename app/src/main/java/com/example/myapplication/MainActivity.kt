@@ -27,8 +27,8 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
-
-import java.util.Date;
+import kotlin.math.exp
+import java.util.Date
 
 class MainActivity : AppCompatActivity() {
     private lateinit var map: MapView
@@ -100,10 +100,10 @@ class MainActivity : AppCompatActivity() {
         val geoPointStart = addressToGeoPoint(startPlace)
         val geoPointEnd = addressToGeoPoint(endPlace)
 
-        var newDate20 = date
+        val newDate20 = date
         newDate20.minutes = date.minutes+20
 
-        var newDate40 = date
+        val newDate40 = date
         newDate40.minutes = date.minutes+40
 
         val listAll = ArrayList<Int>()
@@ -148,11 +148,6 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun lastLocation(road: Road): GeoPoint {
-        return road.mNodes[road.mNodes.size-1].mLocation
-    }
-
-
     @OptIn(ExperimentalSerializationApi::class)
     private fun addressToGeoPoint(place : String) : GeoPoint {
         val space = TisseoApiClient.places(place,"","fr" )?.placesList?.place?.get(0)!!
@@ -173,7 +168,7 @@ class MainActivity : AppCompatActivity() {
 
         for(index in rollingStocks){
             out += "commercial_mode:$index"
-            if (index!=rollingStocks.get(rollingStocks.size-1)) out+=",";
+            if (index!=rollingStocks.get(rollingStocks.size-1)) out+=","
         }
         return out
     }
@@ -253,11 +248,42 @@ class MainActivity : AppCompatActivity() {
         return road
     }
 
+    /*
+        Le but de cette fonction est de calculé à qu'elle point un chemin est pénible
+        Sachant qu'une forte pénibilité sur une partie du trajet sera plus impactant pour l'utilisateur
+        qu'une pénibilité moyenne sur tout le trajet.
+        De plus le changement de pénabilité entre des chemin déja peu pénible aura
+        un impact faible
+
+        nous avons donc décider de la représenter par une fonction exponentiel sur chaque critère
+     */
     private fun price (road : Road): Double {
-        return road.mLength
+        var out = 0.0
+
+        for( portion in road.mNodes){
+            val coefCrown = crown(portion)
+            val coefLight = light(portion)
+            val coefSound = sound(portion)
+
+            out += (exp(coefCrown)+ exp(coefLight) + exp(coefSound)) * portion.mLength
+        }
+
+        return out
     }
 
-
+    /*
+        Ces fonctions servent à redonner les informations sur les routes
+        et de les comparer au sensibilité de l'utilisateur
+     */
+    private fun crown (roadNode: RoadNode) : Double{
+        return 1.0
+    }
+    private fun light (roadNode: RoadNode) : Double{
+        return 1.0
+    }
+    private fun sound (roadNode: RoadNode) : Double{
+        return 1.0
+    }
 
 
     private fun drawJourney(road: Road) {
