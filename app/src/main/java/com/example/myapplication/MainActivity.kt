@@ -16,7 +16,6 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.preference.PreferenceManager
 import com.example.myapplication.tisseo.JourneyResponse
-import com.example.myapplication.tisseo.PlacesResponse
 import com.example.myapplication.tisseo.TisseoApiClient
 import kotlinx.serialization.ExperimentalSerializationApi
 import org.osmdroid.bonuspack.routing.Road
@@ -28,8 +27,8 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
-import kotlin.math.pow
 
+import java.util.Date;
 
 class MainActivity : AppCompatActivity() {
     private lateinit var map: MapView
@@ -94,26 +93,59 @@ class MainActivity : AppCompatActivity() {
     )
 
 
-    private fun tisseoRouting (startPlace:String, endPlace:String, roadMode:String){
+    private fun tisseoRouting (startPlace:String, endPlace:String, roadMode:String, date : Date){
         val file =ArrayList<RoadNodeForRouting>()
         file.clear()
 
         val geoPointStart = addressToGeoPoint(startPlace)
         val geoPointEnd = addressToGeoPoint(endPlace)
 
-        aRouting(geoPointStart, geoPointEnd, roadMode, file)
+        var newDate20 = date
+        newDate20.minutes = date.minutes+20
+
+        var newDate40 = date
+        newDate40.minutes = date.minutes+40
+
+        val listAll = ArrayList<Int>()
+        listAll.add(1);listAll.add(2); listAll.add(3)
+
+        val list12 = ArrayList<Int>()
+        list12.add(1);list12.add(2)
+
+        val list13 = ArrayList<Int>()
+        list13.add(1);list13.add(3)
+
+        val list32 = ArrayList<Int>()
+        list32.add(2); list32.add(3)
+
+        val list1 = ArrayList<Int>()
+        list1.add(1)
+
+        val list2 = ArrayList<Int>()
+        list2.add(2)
+
+        val list3 = ArrayList<Int>()
+        list3.add(3)
+
+
+        val listList = ArrayList< ArrayList<Int>>()
+        listList.add(listAll);listList.add(list3);listList.add(list1);listList.add(list13)
+
+        //listList.add(list2);listList.add(list12);listList.add(list32)
+        // y'a pas de tram a toulouse donc le mode de transport 2 ne sert à rien
+
+        val listDate = ArrayList<Date>()
+        listDate.add(date); listDate.add(newDate20); listDate.add(newDate40)
+
+        for (list in listList){
+            for(newDate in listDate){
+                aRouting(geoPointStart, geoPointEnd, roadMode, file, newDate, list)
+            }
+        }
+
         drawJourney(selectBest(file).road)
 
-        /*
-            TODO:
-            Il faut les buisness travel séparer + combos des deux
-            Décalage d'horraire de 10-15 min
 
-
-            les horraires sont passer par le main, debase le main passera la date actuel
-             -> rechercher une librairie
-                regarder l'API
-         */
     }
 
     private fun lastLocation(road: Road): GeoPoint {
@@ -132,6 +164,20 @@ class MainActivity : AppCompatActivity() {
         return place.longitude.toString()+","+place.latitude.toString()
     }
 
+    private fun printDateTisseo(date : Date) :String {
+        return ""+(date.year+1900)+"-"+(date.month+1)+"-"+date.date+" "+date.hours+":"+date.minutes
+    }
+
+    private fun printRollingStockTisseo(rollingStocks : ArrayList<Int> ) :String {
+        var out = ""
+
+        for(index in rollingStocks){
+            out += "commercial_mode:$index"
+            if (index!=rollingStocks.get(rollingStocks.size-1)) out+=",";
+        }
+        return out
+    }
+
     private fun selectBest(file : ArrayList<RoadNodeForRouting>) : RoadNodeForRouting {
         var out = file[0]
 
@@ -144,8 +190,8 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    private fun aRouting(startPlace:GeoPoint, endPlace:GeoPoint, roadMode:String, file : ArrayList<RoadNodeForRouting>){
-        val journeyData = TisseoApiClient.journey(printGeoPointTisseo(startPlace),printGeoPointTisseo(endPlace),roadMode,"4")
+    private fun aRouting(startPlace:GeoPoint, endPlace:GeoPoint, roadMode:String, file : ArrayList<RoadNodeForRouting>, date : Date, rollingStocks :ArrayList<Int> ){
+        val journeyData = TisseoApiClient.journey(printGeoPointTisseo(startPlace),printGeoPointTisseo(endPlace),roadMode,"4", printDateTisseo(date), printRollingStockTisseo(rollingStocks))
 
         for(i in 0..3){
             val road = journeyToRoad(journeyData!!.routePlannerResult.journeys[i].journey)
@@ -247,7 +293,8 @@ class MainActivity : AppCompatActivity() {
                     it.getStringExtra("Departure")?.also { departureAddress ->
                         it.getStringExtra("Arrival")?.also { arrivalAddress ->
                             Thread {
-                                tisseoRouting(departureAddress, arrivalAddress, "walk")
+                                val date = Date()
+                                tisseoRouting(departureAddress, arrivalAddress, "walk", date)
                             }.start()
                         }
                     }

@@ -51,6 +51,8 @@ object TisseoApiClient {
         arrivalPlace: String,
         roadMode: String,
         number: String,
+        firstDepartureDatetime: String,
+        rollingStockList : String = "commercial_mode:1,commercial_mode:3,commercial_mode:2",
         displayWording: String = "1",
         lang: String = "fr"
     ) = executeGetRequest(
@@ -58,7 +60,10 @@ object TisseoApiClient {
         apiEntryUri.buildUpon().appendPath("journeys.json")
             .appendQueryParameter("departurePlaceXY", departurePlace)
             .appendQueryParameter("arrivalPlaceXY", arrivalPlace)
-            .appendQueryParameter("roadMode", roadMode).appendQueryParameter("number", number)
+            .appendQueryParameter("firstDepartureDatetime", firstDepartureDatetime)
+            .appendQueryParameter("roadMode", roadMode)
+            .appendQueryParameter("rollingStockList", rollingStockList)
+            .appendQueryParameter("number", number)
             .appendQueryParameter("displayWording", displayWording)
             .appendQueryParameter("lang", lang).build()
     )
