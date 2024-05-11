@@ -15,7 +15,12 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.preference.PreferenceManager
+import com.example.myapplication.tisseo.BUS
+import com.example.myapplication.tisseo.BUS_RAPID_TRANSIT
+import com.example.myapplication.tisseo.CABLE_CAR
 import com.example.myapplication.tisseo.JourneyResponse
+import com.example.myapplication.tisseo.METRO
+import com.example.myapplication.tisseo.TRAMWAY
 import com.example.myapplication.tisseo.TisseoApiClient
 import kotlinx.serialization.ExperimentalSerializationApi
 import org.osmdroid.bonuspack.routing.Road
@@ -27,13 +32,15 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import kotlin.math.exp
-import java.util.Date
 
 class MainActivity : AppCompatActivity() {
     private lateinit var map: MapView
     private lateinit var buttonJourneyPlanner: Button
     private lateinit var buttonSettings: Button
+    private val tisseoDateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -86,160 +93,132 @@ class MainActivity : AppCompatActivity() {
         map.onPause()  //needed for compass, my location overlays, v6.0.0 and up
     }
 
-    data class RoadNodeForRouting(
-        val road: Road,
-        val cost: Double,
-
-    )
+    data class RoadNodeForRouting(val road: Road, val cost: Double)
 
 
-    private fun tisseoRouting (startPlace:String, endPlace:String, roadMode:String, date : Date){
-        val file =ArrayList<RoadNodeForRouting>()
-        file.clear()
+    private fun tisseoRouting(
+        startPlace: String,
+        endPlace: String,
+        roadMode: String,
+        date: LocalDateTime
+    ) {
+        val file = ArrayList<RoadNodeForRouting>()
 
         val geoPointStart = addressToGeoPoint(startPlace)
         val geoPointEnd = addressToGeoPoint(endPlace)
 
-        val newDate20 = date
-        newDate20.minutes = date.minutes+20
+        val listList = listOf(
+            listOf(METRO, TRAMWAY, CABLE_CAR, BUS_RAPID_TRANSIT, BUS),
+            listOf(METRO, TRAMWAY, CABLE_CAR, BUS_RAPID_TRANSIT),
+            listOf(METRO, TRAMWAY, CABLE_CAR),
+            listOf(METRO, TRAMWAY),
+            listOf(METRO),
+            listOf(TRAMWAY, CABLE_CAR, BUS_RAPID_TRANSIT, BUS),
+            listOf(TRAMWAY, CABLE_CAR, BUS_RAPID_TRANSIT),
+            listOf(TRAMWAY, CABLE_CAR),
+            listOf(TRAMWAY),
+            listOf(CABLE_CAR, BUS_RAPID_TRANSIT, BUS),
+            listOf(CABLE_CAR, BUS_RAPID_TRANSIT),
+            listOf(CABLE_CAR),
+            listOf(BUS_RAPID_TRANSIT, BUS),
+            listOf(BUS_RAPID_TRANSIT),
+            listOf(BUS)
+        )
 
-        val newDate40 = date
-        newDate40.minutes = date.minutes+40
+        // <Plot a dit> : y'a pas de tram a toulouse donc le mode de transport 2 ne sert à rien
 
-        val listAll = ArrayList<Int>()
-        listAll.add(1);listAll.add(2); listAll.add(3)
+        val listDate = listOf(
+            date,
+            date.plusMinutes(20),
+            date.plusMinutes(40),
+        )
 
-        val list12 = ArrayList<Int>()
-        list12.add(1);list12.add(2)
-
-        val list13 = ArrayList<Int>()
-        list13.add(1);list13.add(3)
-
-        val list32 = ArrayList<Int>()
-        list32.add(2); list32.add(3)
-
-        val list1 = ArrayList<Int>()
-        list1.add(1)
-
-        val list2 = ArrayList<Int>()
-        list2.add(2)
-
-        val list3 = ArrayList<Int>()
-        list3.add(3)
-
-
-        val listList = ArrayList< ArrayList<Int>>()
-        listList.add(listAll);listList.add(list3);listList.add(list1);listList.add(list13)
-
-        //listList.add(list2);listList.add(list12);listList.add(list32)
-        // y'a pas de tram a toulouse donc le mode de transport 2 ne sert à rien
-
-        val listDate = ArrayList<Date>()
-        listDate.add(date); listDate.add(newDate20); listDate.add(newDate40)
-
-        for (list in listList){
-            for(newDate in listDate){
+        for (list in listList)
+            for (newDate in listDate)
                 aRouting(geoPointStart, geoPointEnd, roadMode, file, newDate, list)
-            }
-        }
 
         drawJourney(selectBest(file).road)
-
-
     }
 
     @OptIn(ExperimentalSerializationApi::class)
-    private fun addressToGeoPoint(place : String) : GeoPoint {
-        val space = TisseoApiClient.places(place,"","fr" )?.placesList?.place?.get(0)!!
-        return GeoPoint(space.y, space.x)
-    }
+    private fun addressToGeoPoint(place: String) = TisseoApiClient.places(place, "", "fr")!!
+        .placesList.place[0].let { GeoPoint(it.x, it.y) }
+
+    private fun selectBest(file: List<RoadNodeForRouting>) =
+        file.minByOrNull(RoadNodeForRouting::cost)!!
 
 
-    private fun printGeoPointTisseo(place: GeoPoint) : String {
-        return place.longitude.toString()+","+place.latitude.toString()
-    }
-
-    private fun printDateTisseo(date : Date) :String {
-        return ""+(date.year+1900)+"-"+(date.month+1)+"-"+date.date+" "+date.hours+":"+date.minutes
-    }
-
-    private fun printRollingStockTisseo(rollingStocks : ArrayList<Int> ) :String {
-        var out = ""
-
-        for(index in rollingStocks){
-            out += "commercial_mode:$index"
-            if (index!=rollingStocks.get(rollingStocks.size-1)) out+=","
-        }
-        return out
-    }
-
-    private fun selectBest(file : ArrayList<RoadNodeForRouting>) : RoadNodeForRouting {
-        var out = file[0]
-
-        for (node in file){
-            if (out.cost> node.cost){
-                out = node
+    private fun aRouting(
+        startPlace: GeoPoint,
+        endPlace: GeoPoint,
+        roadMode: String,
+        file: MutableList<RoadNodeForRouting>,
+        date: LocalDateTime,
+        rollingStocks: List<String>
+    ) {
+        TisseoApiClient.journey(
+            "${startPlace.latitude},${startPlace.longitude}",
+            "${endPlace.latitude},${endPlace.longitude}",
+            roadMode,
+            "4",
+            date.format(tisseoDateFormatter),
+            rollingStocks.joinToString(",")
+        )?.also {
+            it.routePlannerResult.journeys.forEach { j ->
+                val road = journeyToRoad(j.journey)
+                val price = price(road)
+                file.add(RoadNodeForRouting(road, price))
             }
         }
-        return out
     }
 
-
-    private fun aRouting(startPlace:GeoPoint, endPlace:GeoPoint, roadMode:String, file : ArrayList<RoadNodeForRouting>, date : Date, rollingStocks :ArrayList<Int> ){
-        val journeyData = TisseoApiClient.journey(printGeoPointTisseo(startPlace),printGeoPointTisseo(endPlace),roadMode,"4", printDateTisseo(date), printRollingStockTisseo(rollingStocks))
-
-        for(i in 0..3){
-            val road = journeyToRoad(journeyData!!.routePlannerResult.journeys[i].journey)
-
-            val price = price(road)
-
-            val node = RoadNodeForRouting(road, price)
-            file.add(node)
-        }
-    }
-
-    private fun journeyToRoad(journey :  JourneyResponse.RoutePlannerResult.JourneyItem.Journey ): Road {
+    private fun journeyToRoad(journey: JourneyResponse.RoutePlannerResult.JourneyItem.Journey): Road {
         val road = Road()
 
-        journey.chunks.forEach{chunk ->
+        journey.chunks.forEach { chunk ->
 
-            if (chunk.service != null){
+            if (chunk.service != null) {
                 val wkt = chunk.service.wkt
                 val coordinates = wkt.substringAfter("(").substringBeforeLast(")").split(",")
                 val roadNode = RoadNode()
                 roadNode.mInstructions = chunk.service.text?.text
                 val (long, lat) = coordinates[0].trim().split(" ")
-                val units = chunk.service.duration.split(":".toRegex()).dropLastWhile { it.isEmpty() }
-                    .toTypedArray()
-                val duration = 3600 * units[0].toInt() +60 * units[1].toInt() + units[2].toInt()
+                val units =
+                    chunk.service.duration.split(":".toRegex()).dropLastWhile { it.isEmpty() }
+                        .toTypedArray()
+                val duration = 3600 * units[0].toInt() + 60 * units[1].toInt() + units[2].toInt()
                 roadNode.mDuration = duration.toDouble()
-                roadNode.mLocation = GeoPoint(lat.toDouble(),long.toDouble())
+                roadNode.mLocation = GeoPoint(lat.toDouble(), long.toDouble())
                 road.mNodes.add(roadNode)
                 coordinates.forEach { coordinate ->
                     val (longitude, latitude) = coordinate.trim().split(" ")
-                    road.mRouteHigh.add(GeoPoint(latitude.toDouble(),longitude.toDouble()))
+                    road.mRouteHigh.add(GeoPoint(latitude.toDouble(), longitude.toDouble()))
                 }
-            } else if(chunk.street != null){
+            } else if (chunk.street != null) {
                 val wkt = chunk.street.wkt
                 val roadNode = RoadNode()
                 roadNode.mInstructions = chunk.street.text.text
-                val units = chunk.street.duration.split(":".toRegex()).dropLastWhile { it.isEmpty() }
-                    .toTypedArray()
-                val duration = 3600 * units[0].toInt() +60 * units[1].toInt() + units[2].toInt()
+                val units =
+                    chunk.street.duration.split(":".toRegex()).dropLastWhile { it.isEmpty() }
+                        .toTypedArray()
+                val duration = 3600 * units[0].toInt() + 60 * units[1].toInt() + units[2].toInt()
                 roadNode.mDuration = duration.toDouble()
-                roadNode.mLength = chunk.street.length.toDouble()/1000
-                roadNode.mLocation = GeoPoint(chunk.street.startAddress.connectionPlace.latitude.toDouble(),chunk.street.startAddress.connectionPlace.longitude.toDouble())
+                roadNode.mLength = chunk.street.length.toDouble() / 1000
+                roadNode.mLocation = GeoPoint(
+                    chunk.street.startAddress.connectionPlace.latitude.toDouble(),
+                    chunk.street.startAddress.connectionPlace.longitude.toDouble()
+                )
                 road.mNodes.add(roadNode)
                 val intermediateCoordinates = wkt.substringAfter("(")
-                val coordinates:List<String> = if(intermediateCoordinates[0] == '('){
+                val coordinates: List<String> = if (intermediateCoordinates[0] == '(') {
                     wkt.substringAfter("((").substringBeforeLast("))").split(",")
-                }else{
+                } else {
                     wkt.substringAfter("(").substringBeforeLast(")").split(",")
                 }
 
-                coordinates.forEach{coordinate ->
-                    val (longitude,latitude) = coordinate.trim().split(" ")
-                    road.mRouteHigh.add(GeoPoint(latitude.toDouble(),longitude.toDouble()))
+                coordinates.forEach { coordinate ->
+                    val (longitude, latitude) = coordinate.trim().split(" ")
+                    road.mRouteHigh.add(GeoPoint(latitude.toDouble(), longitude.toDouble()))
 
                 }
             }
@@ -249,41 +228,30 @@ class MainActivity : AppCompatActivity() {
     }
 
     /*
-        Le but de cette fonction est de calculé à qu'elle point un chemin est pénible
+        Le but de cette fonction est de calculer à qu'elle point un chemin est pénible
         Sachant qu'une forte pénibilité sur une partie du trajet sera plus impactant pour l'utilisateur
         qu'une pénibilité moyenne sur tout le trajet.
-        De plus le changement de pénabilité entre des chemin déja peu pénible aura
+        De plus le changement de pénibilité entre des chemins déja peu pénible aura
         un impact faible
 
-        nous avons donc décider de la représenter par une fonction exponentiel sur chaque critère
+        nous avons donc décidé de la représenter par une fonction exponentielle sur chaque critère
      */
-    private fun price (road : Road): Double {
-        var out = 0.0
-
-        for( portion in road.mNodes){
-            val coefCrown = crown(portion)
-            val coefLight = light(portion)
-            val coefSound = sound(portion)
-
-            out += (exp(coefCrown)+ exp(coefLight) + exp(coefSound)) * portion.mLength
-        }
-
-        return out
+    private fun price(road: Road) = road.mNodes.sumOf {
+        (exp(crown(it)) + exp(light(it)) + exp(sound(it))) * it.mLength
     }
 
     /*
         Ces fonctions servent à redonner les informations sur les routes
-        et de les comparer au sensibilité de l'utilisateur
+        et de les comparer aux sensibilités de l'utilisateur
      */
-    private fun crown (roadNode: RoadNode) : Double{
-        return 1.0
-    }
-    private fun light (roadNode: RoadNode) : Double{
-        return 1.0
-    }
-    private fun sound (roadNode: RoadNode) : Double{
-        return 1.0
-    }
+    @Suppress("UNUSED_PARAMETER")
+    private fun crown(roadNode: RoadNode) = 1.0
+
+    @Suppress("UNUSED_PARAMETER")
+    private fun light(roadNode: RoadNode) = 1.0
+
+    @Suppress("UNUSED_PARAMETER")
+    private fun sound(roadNode: RoadNode) = 1.0
 
 
     private fun drawJourney(road: Road) {
@@ -292,7 +260,10 @@ class MainActivity : AppCompatActivity() {
         map.overlays.add(roadOverlay)
         val nodeIcon = ResourcesCompat.getDrawable(resources, R.drawable.marker_node, theme)
         for (i in road.mNodes.indices) {
-            Log.d(1.toString(), "ajout à la map du point : latitude " + road.mNodes[i].mLocation.latitude + " longitude "+road.mNodes[i].mLocation.longitude)
+            Log.d(
+                1.toString(),
+                "ajout à la map du point : latitude " + road.mNodes[i].mLocation.latitude + " longitude " + road.mNodes[i].mLocation.longitude
+            )
 
             val node = road.mNodes[i]
             val nodeMarker = Marker(map)
@@ -319,8 +290,12 @@ class MainActivity : AppCompatActivity() {
                     it.getStringExtra("Departure")?.also { departureAddress ->
                         it.getStringExtra("Arrival")?.also { arrivalAddress ->
                             Thread {
-                                val date = Date()
-                                tisseoRouting(departureAddress, arrivalAddress, "walk", date)
+                                tisseoRouting(
+                                    departureAddress,
+                                    arrivalAddress,
+                                    "walk",
+                                    LocalDateTime.now()
+                                )
                             }.start()
                         }
                     }

@@ -35,7 +35,7 @@ object TisseoApiClient {
 
     @ExperimentalSerializationApi
     fun places(
-        term: String ="", coordinatesXY : String ="", lang: String = "fr",
+        term: String = "", coordinatesXY: String = "", lang: String = "fr",
     ) = executeGetRequest(
         PlacesResponse.serializer(),
         apiEntryUri.buildUpon().appendPath("places.json")
@@ -52,7 +52,7 @@ object TisseoApiClient {
         roadMode: String,
         number: String,
         firstDepartureDatetime: String,
-        rollingStockList : String = "commercial_mode:1,commercial_mode:3,commercial_mode:2",
+        rollingStockList: String = "commercial_mode:1,commercial_mode:3,commercial_mode:2",
         displayWording: String = "1",
         lang: String = "fr"
     ) = executeGetRequest(
