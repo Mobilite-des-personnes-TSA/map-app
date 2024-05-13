@@ -17,8 +17,8 @@ class JourneyPlanner : AppCompatActivity() {
     private lateinit var buttonCableCar: SwitchCompat
     private lateinit var buttonTram: SwitchCompat
     private lateinit var buttonWheelChair: SwitchCompat
-
-
+    private lateinit var buttonCar: SwitchCompat
+    private lateinit var buttonBike: SwitchCompat
 
     private lateinit var edittextDep: EditText
     private lateinit var edittextArv: EditText
@@ -41,6 +41,8 @@ class JourneyPlanner : AppCompatActivity() {
         buttonSubway = findViewById(R.id.subwaysswitch)
         buttonTram = findViewById(R.id.tramswitch)
         buttonWheelChair = findViewById(R.id.wheelchairswitch)
+        buttonCar = findViewById(R.id.carswitch)
+        buttonBike = findViewById(R.id.personalbycicleswitch)
 
         button = findViewById(R.id.search)
         button.setOnClickListener(this::activityResult)
@@ -55,6 +57,9 @@ class JourneyPlanner : AppCompatActivity() {
         intent.putExtra("CableCar", buttonCableCar.isChecked)
         intent.putExtra("Tram", buttonTram.isChecked)
         intent.putExtra("WheelChair", buttonWheelChair.isChecked)
+        intent.putExtra("Car", buttonCar.isChecked)
+        intent.putExtra("Bike", buttonBike.isChecked)
+
 
         setResult(RESULT_OK, intent)
         finish()

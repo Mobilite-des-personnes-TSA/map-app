@@ -24,6 +24,7 @@ import com.example.myapplication.tisseo.SHUTTLE
 import com.example.myapplication.tisseo.TRAMWAY
 import com.example.myapplication.tisseo.TisseoApiClient
 import kotlinx.serialization.ExperimentalSerializationApi
+import org.osmdroid.bonuspack.routing.OSRMRoadManager
 import org.osmdroid.bonuspack.routing.Road
 import org.osmdroid.bonuspack.routing.RoadManager
 import org.osmdroid.bonuspack.routing.RoadNode
@@ -105,6 +106,8 @@ class MainActivity : AppCompatActivity() {
         tram: Boolean,
         subway: Boolean,
         cableCar: Boolean,
+        car: Boolean,
+        bike: Boolean,
         date: LocalDateTime
     ) {
         val file = ArrayList<RoadNodeForRouting>()
@@ -112,10 +115,16 @@ class MainActivity : AppCompatActivity() {
         val geoPointStart = addressToGeoPoint(startPlace)
         val geoPointEnd = addressToGeoPoint(endPlace)
 
-        var roadMode = "walk"
-        if (wheelChair) {
-            roadMode = "wheelchair"
-        }
+        val listDate = listOf(
+            date,
+            date.plusMinutes(20),
+            date.plusMinutes(40),
+        )
+
+        val roadModeList = ArrayList<String>()
+        roadModeList.add("walk")
+        if (bike) roadModeList.add("bike")
+        if (wheelChair) roadModeList.add("wheelchair")
 
         val transports = ArrayList<List<String>>()
         if (bus) transports.add(listOf(SHUTTLE, BUS))
@@ -127,15 +136,16 @@ class MainActivity : AppCompatActivity() {
 
         // <Plot a dit> : y'a pas de tram a toulouse donc le mode de transport 2 ne sert à rien
 
-        val listDate = listOf(
-            date,
-            date.plusMinutes(20),
-            date.plusMinutes(40),
-        )
+        for (newDate in listDate) {
 
-        for (newDate in listDate)
-            for (transport in transports)
-                aRouting(geoPointStart, geoPointEnd, roadMode, file, newDate, transport)
+            for (roadMode in roadModeList) {
+                osrmRouting(geoPointStart, geoPointEnd, roadMode, file)
+                for (transport in transports)
+                    aRouting(geoPointStart, geoPointEnd, roadMode, file, newDate, transport)
+            }
+
+            if (car) osrmRouting(geoPointStart, geoPointEnd, "car", file)
+        }
 
         drawJourney(selectBest(file).road)
     }
@@ -231,6 +241,38 @@ class MainActivity : AppCompatActivity() {
         return road
     }
 
+    private fun osrmRouting(
+        startPoint: GeoPoint,
+        endPoint: GeoPoint,
+        mode: String,
+        file: MutableList<RoadNodeForRouting>
+    ) {
+
+        val roadManager: RoadManager = OSRMRoadManager(this, "User")
+        when (mode) {
+            "bike" -> {
+                (roadManager as OSRMRoadManager).setMean(OSRMRoadManager.MEAN_BY_BIKE)
+            }
+
+            "car" -> {
+                (roadManager as OSRMRoadManager).setMean(OSRMRoadManager.MEAN_BY_CAR)
+            }
+
+            else -> {
+                (roadManager as OSRMRoadManager).setMean(OSRMRoadManager.MEAN_BY_FOOT)
+            }
+        }
+
+        val waypoints = ArrayList<GeoPoint>()
+        waypoints.add(startPoint)
+        waypoints.add(endPoint)
+
+        val road = roadManager.getRoad(waypoints)
+        val price = price(road)
+        file.add(RoadNodeForRouting(road, price))
+    }
+
+
     /*
         Le but de cette fonction est de calculer à qu'elle point un chemin est pénible
         Sachant qu'une forte pénibilité sur une partie du trajet sera plus impactant pour l'utilisateur
@@ -250,45 +292,51 @@ class MainActivity : AppCompatActivity() {
      */
 
     private fun crown(roadNode: RoadNode): Double {
-        val out = if ((43.55 < roadNode.mLocation.latitude && roadNode.mLocation.latitude  < 43.65) &&
-            (1.4 < roadNode.mLocation.longitude && roadNode.mLocation.longitude < 1.5 )){
-            Math.random() * 2 + 1
-        }else {
-            Math.random()
-        }
+        val out =
+            if ((43.55 < roadNode.mLocation.latitude && roadNode.mLocation.latitude < 43.65) &&
+                (1.4 < roadNode.mLocation.longitude && roadNode.mLocation.longitude < 1.5)
+            ) {
+                Math.random() * 2 + 1
+            } else {
+                Math.random()
+            }
 
         if (out > 2) { //TODO : caller ce nombre en fonction de la sensibiliter des utilisateurs
-            roadNode.mManeuverType *=2
+            roadNode.mManeuverType *= 2
         }
 
         return out
     }
 
-    private fun light(roadNode: RoadNode) : Double {
-        val out = if ((43.55 < roadNode.mLocation.latitude && roadNode.mLocation.latitude  < 43.65) &&
-            (1.4 < roadNode.mLocation.longitude && roadNode.mLocation.longitude < 1.5 )){
-            Math.random() * 2 + 1
-        }else {
-            Math.random()
-        }
+    private fun light(roadNode: RoadNode): Double {
+        val out =
+            if ((43.55 < roadNode.mLocation.latitude && roadNode.mLocation.latitude < 43.65) &&
+                (1.4 < roadNode.mLocation.longitude && roadNode.mLocation.longitude < 1.5)
+            ) {
+                Math.random() * 2 + 1
+            } else {
+                Math.random()
+            }
 
         if (out > 2) { //TODO : caller ce nombre en fonction de la sensibiliter des utilisateurs
-            roadNode.mManeuverType *=3
+            roadNode.mManeuverType *= 3
         }
 
         return out
     }
 
-    private fun sound(roadNode: RoadNode) : Double {
-        val out = if ((43.55 < roadNode.mLocation.latitude && roadNode.mLocation.latitude  < 43.65) &&
-            (1.4 < roadNode.mLocation.longitude && roadNode.mLocation.longitude < 1.5 )){
-            Math.random() * 2 + 1
-        }else {
-            Math.random()
-        }
+    private fun sound(roadNode: RoadNode): Double {
+        val out =
+            if ((43.55 < roadNode.mLocation.latitude && roadNode.mLocation.latitude < 43.65) &&
+                (1.4 < roadNode.mLocation.longitude && roadNode.mLocation.longitude < 1.5)
+            ) {
+                Math.random() * 2 + 1
+            } else {
+                Math.random()
+            }
 
         if (out > 2) { //TODO : caller ce nombre en fonction de la sensibiliter des utilisateurs
-            roadNode.mManeuverType *=5
+            roadNode.mManeuverType *= 5
         }
         return out
     }
@@ -298,8 +346,10 @@ class MainActivity : AppCompatActivity() {
         val roadOverlay: Polyline = RoadManager.buildRoadOverlay(road)
         map.overlays.clear()
         map.overlays.add(roadOverlay)
-        val nodeIconNormal = ResourcesCompat.getDrawable(resources, R.drawable.normal_marker_node, theme)
-        val nodeIconDanger = ResourcesCompat.getDrawable(resources, R.drawable.danger_marker_node, theme)
+        val nodeIconNormal =
+            ResourcesCompat.getDrawable(resources, R.drawable.normal_marker_node, theme)
+        val nodeIconDanger =
+            ResourcesCompat.getDrawable(resources, R.drawable.danger_marker_node, theme)
 
         for (i in road.mNodes.indices) {
             Log.d(
@@ -312,20 +362,20 @@ class MainActivity : AppCompatActivity() {
             nodeMarker.setPosition(node.mLocation)
             nodeMarker.title = "Step $i"
 
-            if (node.mManeuverType==1){
+            if (node.mManeuverType == 1) {
                 nodeMarker.icon = nodeIconNormal
                 nodeMarker.snippet = node.mInstructions
-            }else{
+            } else {
                 nodeMarker.icon = nodeIconDanger
                 var string = ""
 
-                if ((node.mManeuverType%2)==0){
+                if ((node.mManeuverType % 2) == 0) {
                     string += " Attention à la foule "
                 }
-                if ((node.mManeuverType%3)==0){
+                if ((node.mManeuverType % 3) == 0) {
                     string += " Attention à la lumière "
                 }
-                if ((node.mManeuverType%5)==0){
+                if ((node.mManeuverType % 5) == 0) {
                     string += " Attention au bruit  "
                 }
 
@@ -354,20 +404,25 @@ class MainActivity : AppCompatActivity() {
                                 it.getBooleanExtra("Subway", true).also { subway ->
                                     it.getBooleanExtra("CableCar", true).also { cableCar ->
                                         it.getBooleanExtra("Tram", true).also { tram ->
-                                            it.getBooleanExtra("WheelChair", false)
-                                                .also { wheelChair ->
-                                                    Thread {
-                                                        tisseoRouting(
-                                                            departureAddress,
-                                                            arrivalAddress,
-                                                            wheelChair,
-                                                            bus,
-                                                            tram,
-                                                            subway,
-                                                            cableCar,
-                                                            LocalDateTime.now()
-                                                        )
-                                                    }.start()
+                                            it.getBooleanExtra("WheelChair", false).also { wheelChair ->
+                                                    it.getBooleanExtra("Car", false).also { car ->
+                                                        it.getBooleanExtra("Bike", false).also { bike ->
+                                                                Thread {
+                                                                    tisseoRouting(
+                                                                        departureAddress,
+                                                                        arrivalAddress,
+                                                                        wheelChair,
+                                                                        bus,
+                                                                        tram,
+                                                                        subway,
+                                                                        cableCar,
+                                                                        car,
+                                                                        bike,
+                                                                        LocalDateTime.now()
+                                                                    )
+                                                                }.start()
+                                                            }
+                                                    }
                                                 }
                                         }
                                     }
