@@ -165,48 +165,48 @@
                         android:textSize="20sp"
                         android:translationX="20dp" />
 
-                    <Switch
+                    <androidx.appcompat.widget.SwitchCompat
                         android:id="@+id/personalbycicleswitch"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="personal bycicle"
-                        android:textSize="14sp"
+                        android:textSize="11sp"
                         android:translationX="20dp" />
 
-                    <Switch
+                    <androidx.appcompat.widget.SwitchCompat
                         android:id="@+id/tramswitch"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="tram"
-                        android:textSize="14sp"
+                        android:textSize="11sp"
                         android:translationX="20dp" />
 
-                    <Switch
+                    <androidx.appcompat.widget.SwitchCompat
                         android:id="@+id/subwaysswitch"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="subways"
-                        android:textSize="14sp"
+                        android:textSize="11sp"
                         android:translationX="20dp" />
 
-                    <Switch
+                    <androidx.appcompat.widget.SwitchCompat
                         android:id="@+id/busswitch"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="bus"
-                        android:textSize="14sp"
+                        android:textSize="11sp"
                         android:translationX="20dp" />
 
-                    <Switch
+                    <androidx.appcompat.widget.SwitchCompat
                         android:id="@+id/cablecarswitch"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="cable car"
-                        android:textSize="14sp"
+                        android:textSize="11sp"
                         android:translationX="20dp" />
 
 
-                    <Switch
+                    <androidx.appcompat.widget.SwitchCompat
                         android:id="@+id/wheelchairswitch"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"

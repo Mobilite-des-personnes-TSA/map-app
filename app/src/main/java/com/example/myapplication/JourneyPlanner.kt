@@ -4,19 +4,19 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
-import android.widget.CheckBox
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SwitchCompat
 import androidx.preference.PreferenceFragmentCompat
 
 class JourneyPlanner : AppCompatActivity() {
     private lateinit var button: Button
 
-    private lateinit var buttonSubway: CheckBox
-    private lateinit var buttonBus: CheckBox
-    private lateinit var buttonCableCar: CheckBox
-    private lateinit var buttonTram: CheckBox
-    private lateinit var buttonWheelChair: CheckBox
+    private lateinit var buttonSubway: SwitchCompat
+    private lateinit var buttonBus: SwitchCompat
+    private lateinit var buttonCableCar: SwitchCompat
+    private lateinit var buttonTram: SwitchCompat
+    private lateinit var buttonWheelChair: SwitchCompat
 
 
 
