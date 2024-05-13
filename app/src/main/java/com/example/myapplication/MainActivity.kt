@@ -190,6 +190,7 @@ class MainActivity : AppCompatActivity() {
                     3600 * units[0].toInt() + 60 * units[1].toInt() + units[2].toInt()
                 roadNode.mDuration = duration.toDouble()
                 roadNode.mLocation = GeoPoint(lat.toDouble(), long.toDouble())
+                roadNode.mManeuverType = 1
                 road.mNodes.add(roadNode)
                 coordinates.forEach { coordinate ->
                     val (longitude, latitude) = coordinate.trim().split(" ")
@@ -210,6 +211,7 @@ class MainActivity : AppCompatActivity() {
                     chunk.street.startAddress.connectionPlace.latitude.toDouble(),
                     chunk.street.startAddress.connectionPlace.longitude.toDouble()
                 )
+                roadNode.mManeuverType = 1
                 road.mNodes.add(roadNode)
                 val intermediateCoordinates = wkt.substringAfter("(")
                 val coordinates: List<String> = if (intermediateCoordinates[0] == '(') {
@@ -255,6 +257,10 @@ class MainActivity : AppCompatActivity() {
             Math.random()
         }
 
+        if (out > 2) { //TODO : caller ce nombre en fonction de la sensibiliter des utilisateurs
+            roadNode.mManeuverType *=2
+        }
+
         return out
     }
 
@@ -264,6 +270,10 @@ class MainActivity : AppCompatActivity() {
             Math.random() * 2 + 1
         }else {
             Math.random()
+        }
+
+        if (out > 2) { //TODO : caller ce nombre en fonction de la sensibiliter des utilisateurs
+            roadNode.mManeuverType *=3
         }
 
         return out
@@ -277,6 +287,9 @@ class MainActivity : AppCompatActivity() {
             Math.random()
         }
 
+        if (out > 2) { //TODO : caller ce nombre en fonction de la sensibiliter des utilisateurs
+            roadNode.mManeuverType *=5
+        }
         return out
     }
 
@@ -285,7 +298,9 @@ class MainActivity : AppCompatActivity() {
         val roadOverlay: Polyline = RoadManager.buildRoadOverlay(road)
         map.overlays.clear()
         map.overlays.add(roadOverlay)
-        val nodeIcon = ResourcesCompat.getDrawable(resources, R.drawable.marker_node, theme)
+        val nodeIconNormal = ResourcesCompat.getDrawable(resources, R.drawable.normal_marker_node, theme)
+        val nodeIconDanger = ResourcesCompat.getDrawable(resources, R.drawable.danger_marker_node, theme)
+
         for (i in road.mNodes.indices) {
             Log.d(
                 1.toString(),
@@ -295,9 +310,28 @@ class MainActivity : AppCompatActivity() {
             val node = road.mNodes[i]
             val nodeMarker = Marker(map)
             nodeMarker.setPosition(node.mLocation)
-            nodeMarker.icon = nodeIcon
             nodeMarker.title = "Step $i"
-            nodeMarker.snippet = node.mInstructions
+
+            if (node.mManeuverType==1){
+                nodeMarker.icon = nodeIconNormal
+                nodeMarker.snippet = node.mInstructions
+            }else{
+                nodeMarker.icon = nodeIconDanger
+                var string = ""
+
+                if ((node.mManeuverType%2)==0){
+                    string += " Attention à la foule "
+                }
+                if ((node.mManeuverType%3)==0){
+                    string += " Attention à la lumière "
+                }
+                if ((node.mManeuverType%5)==0){
+                    string += " Attention au bruit  "
+                }
+
+                nodeMarker.snippet = string + node.mInstructions
+            }
+
 
             nodeMarker.subDescription =
                 Road.getLengthDurationText(this, node.mLength, node.mDuration)
