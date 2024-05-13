@@ -99,7 +99,11 @@ class MainActivity : AppCompatActivity() {
     private fun tisseoRouting(
         startPlace: String,
         endPlace: String,
-        roadMode: String,
+        wheelChair: Boolean,
+        bus: Boolean,
+        tram: Boolean,
+        subway: Boolean,
+        cableCar: Boolean,
         date: LocalDateTime
     ) {
         val file = ArrayList<RoadNodeForRouting>()
@@ -107,23 +111,78 @@ class MainActivity : AppCompatActivity() {
         val geoPointStart = addressToGeoPoint(startPlace)
         val geoPointEnd = addressToGeoPoint(endPlace)
 
-        val listList = listOf(
-            listOf(METRO, TRAMWAY, CABLE_CAR, BUS_RAPID_TRANSIT, BUS),
-            listOf(METRO, TRAMWAY, CABLE_CAR, BUS_RAPID_TRANSIT),
-            listOf(METRO, TRAMWAY, CABLE_CAR),
-            listOf(METRO, TRAMWAY),
-            listOf(METRO),
-            listOf(TRAMWAY, CABLE_CAR, BUS_RAPID_TRANSIT, BUS),
-            listOf(TRAMWAY, CABLE_CAR, BUS_RAPID_TRANSIT),
-            listOf(TRAMWAY, CABLE_CAR),
-            listOf(TRAMWAY),
-            listOf(CABLE_CAR, BUS_RAPID_TRANSIT, BUS),
-            listOf(CABLE_CAR, BUS_RAPID_TRANSIT),
-            listOf(CABLE_CAR),
-            listOf(BUS_RAPID_TRANSIT, BUS),
-            listOf(BUS_RAPID_TRANSIT),
-            listOf(BUS)
-        )
+        var roadMode = "walk"
+        if (wheelChair) {
+            roadMode = "wheelchair"
+        }
+
+        val listList = ArrayList<List<String>>()
+
+
+
+        if (bus) {
+            if (tram) {
+                if (subway) {
+                    if (cableCar) {
+                        listList.add(listOf(METRO, TRAMWAY, CABLE_CAR, BUS_RAPID_TRANSIT, BUS))
+                    } else {
+                        listList.add(listOf(METRO, TRAMWAY, BUS_RAPID_TRANSIT, BUS))
+                    }
+                } else {
+                    if (cableCar) {
+                        listList.add(listOf(TRAMWAY, CABLE_CAR, BUS_RAPID_TRANSIT, BUS))
+                    } else {
+                        listList.add(listOf(TRAMWAY, BUS_RAPID_TRANSIT, BUS))
+                    }
+                }
+            } else {
+                if (subway) {
+                    if (cableCar) {
+                        listList.add(listOf(METRO, CABLE_CAR, BUS_RAPID_TRANSIT, BUS))
+                    } else {
+                        listList.add(listOf(METRO, BUS_RAPID_TRANSIT, BUS))
+                    }
+                } else {
+                    if (cableCar) {
+                        listList.add(listOf(CABLE_CAR, BUS_RAPID_TRANSIT, BUS))
+                    } else {
+                        listList.add(listOf(BUS_RAPID_TRANSIT, BUS))
+                    }
+                }
+            }
+
+
+        } else {
+            if (tram) {
+                if (subway) {
+                    if (cableCar) {
+                        listList.add(listOf(METRO, TRAMWAY, CABLE_CAR))
+                    } else {
+                        listList.add(listOf(METRO, TRAMWAY))
+                    }
+                } else {
+                    if (cableCar) {
+                        listList.add(listOf(TRAMWAY, CABLE_CAR))
+                    } else {
+                        listList.add(listOf(TRAMWAY))
+                    }
+                }
+            } else {
+                if (subway) {
+                    if (cableCar) {
+                        listList.add(listOf(METRO, CABLE_CAR))
+                    } else {
+                        listList.add(listOf(METRO))
+                    }
+                } else {
+                    if (cableCar) {
+                        listList.add(listOf(CABLE_CAR))
+                    }
+                }
+
+            }
+        }
+
 
         // <Plot a dit> : y'a pas de tram a toulouse donc le mode de transport 2 ne sert à rien
 
@@ -289,18 +348,28 @@ class MainActivity : AppCompatActivity() {
                 result.data?.also {
                     it.getStringExtra("Departure")?.also { departureAddress ->
                         it.getStringExtra("Arrival")?.also { arrivalAddress ->
-                            Thread {
-                                tisseoRouting(
-                                    departureAddress,
-                                    arrivalAddress,
-                                    "walk",
-                                    LocalDateTime.now()
-                                )
-                            }.start()
-                        }
-                    }
-                }
-            }
+                            it.getBooleanExtra("Bus", true).also { bus ->
+                                it.getBooleanExtra("Subway", true).also { subway ->
+                                    it.getBooleanExtra("CableCar", true).also { cableCar ->
+                                        it.getBooleanExtra("Tram", true).also { tram ->
+                                            it.getBooleanExtra("WheelChair", false)
+                                                .also { wheelChair ->
+                                                    Thread {
+                                                        tisseoRouting(
+                                                            departureAddress,
+                                                            arrivalAddress,
+                                                            wheelChair,
+                                                            bus,
+                                                            tram,
+                                                            subway,
+                                                            cableCar,
+                                                            LocalDateTime.now()
+                                                        )
+                                                    }.start()
+                                                }
+                                        }
+                                    }
+                                }
 
-        }
-}
+                            }
+                        }

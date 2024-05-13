@@ -166,7 +166,7 @@
                         android:translationX="20dp" />
 
                     <Switch
-                        android:id="@+id/noiseswitch"
+                        android:id="@+id/personalbycicleswitch"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="personal bycicle"
@@ -174,26 +174,43 @@
                         android:translationX="20dp" />
 
                     <Switch
-                        android:id="@+id/crowdswitch"
+                        android:id="@+id/tramswitch"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="velib"
+                        android:text="tram"
                         android:textSize="14sp"
                         android:translationX="20dp" />
 
                     <Switch
-                        android:id="@+id/lightswitch"
+                        android:id="@+id/subwaysswitch"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="public transportation"
+                        android:text="subways"
                         android:textSize="14sp"
                         android:translationX="20dp" />
 
                     <Switch
-                        android:id="@+id/switch1"
+                        android:id="@+id/busswitch"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="just walking"
+                        android:text="bus"
+                        android:textSize="14sp"
+                        android:translationX="20dp" />
+
+                    <Switch
+                        android:id="@+id/cablecarswitch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="cable car"
+                        android:textSize="14sp"
+                        android:translationX="20dp" />
+
+
+                    <Switch
+                        android:id="@+id/wheelchairswitch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="wheel chair"
                         android:translationX="20dp" />
                 </LinearLayout>
 
