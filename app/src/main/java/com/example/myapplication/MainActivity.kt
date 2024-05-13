@@ -246,14 +246,39 @@ class MainActivity : AppCompatActivity() {
         Ces fonctions servent à redonner les informations sur les routes
         et de les comparer aux sensibilités de l'utilisateur
      */
-    @Suppress("UNUSED_PARAMETER")
-    private fun crown(roadNode: RoadNode) = 1.0
 
-    @Suppress("UNUSED_PARAMETER")
-    private fun light(roadNode: RoadNode) = 1.0
+    private fun crown(roadNode: RoadNode): Double {
+        val out = if ((43.55 < roadNode.mLocation.latitude && roadNode.mLocation.latitude  < 43.65) &&
+            (1.4 < roadNode.mLocation.longitude && roadNode.mLocation.longitude < 1.5 )){
+            Math.random() * 2 + 1
+        }else {
+            Math.random()
+        }
 
-    @Suppress("UNUSED_PARAMETER")
-    private fun sound(roadNode: RoadNode) = 1.0
+        return out
+    }
+
+    private fun light(roadNode: RoadNode) : Double {
+        val out = if ((43.55 < roadNode.mLocation.latitude && roadNode.mLocation.latitude  < 43.65) &&
+            (1.4 < roadNode.mLocation.longitude && roadNode.mLocation.longitude < 1.5 )){
+            Math.random() * 2 + 1
+        }else {
+            Math.random()
+        }
+
+        return out
+    }
+
+    private fun sound(roadNode: RoadNode) : Double {
+        val out = if ((43.55 < roadNode.mLocation.latitude && roadNode.mLocation.latitude  < 43.65) &&
+            (1.4 < roadNode.mLocation.longitude && roadNode.mLocation.longitude < 1.5 )){
+            Math.random() * 2 + 1
+        }else {
+            Math.random()
+        }
+
+        return out
+    }
 
 
     private fun drawJourney(road: Road) {
