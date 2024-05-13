@@ -20,6 +20,7 @@ import com.example.myapplication.tisseo.BUS_RAPID_TRANSIT
 import com.example.myapplication.tisseo.CABLE_CAR
 import com.example.myapplication.tisseo.JourneyResponse
 import com.example.myapplication.tisseo.METRO
+import com.example.myapplication.tisseo.SHUTTLE
 import com.example.myapplication.tisseo.TRAMWAY
 import com.example.myapplication.tisseo.TisseoApiClient
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -116,72 +117,12 @@ class MainActivity : AppCompatActivity() {
             roadMode = "wheelchair"
         }
 
-        val listList = ArrayList<List<String>>()
-
-
-
-        if (bus) {
-            if (tram) {
-                if (subway) {
-                    if (cableCar) {
-                        listList.add(listOf(METRO, TRAMWAY, CABLE_CAR, BUS_RAPID_TRANSIT, BUS))
-                    } else {
-                        listList.add(listOf(METRO, TRAMWAY, BUS_RAPID_TRANSIT, BUS))
-                    }
-                } else {
-                    if (cableCar) {
-                        listList.add(listOf(TRAMWAY, CABLE_CAR, BUS_RAPID_TRANSIT, BUS))
-                    } else {
-                        listList.add(listOf(TRAMWAY, BUS_RAPID_TRANSIT, BUS))
-                    }
-                }
-            } else {
-                if (subway) {
-                    if (cableCar) {
-                        listList.add(listOf(METRO, CABLE_CAR, BUS_RAPID_TRANSIT, BUS))
-                    } else {
-                        listList.add(listOf(METRO, BUS_RAPID_TRANSIT, BUS))
-                    }
-                } else {
-                    if (cableCar) {
-                        listList.add(listOf(CABLE_CAR, BUS_RAPID_TRANSIT, BUS))
-                    } else {
-                        listList.add(listOf(BUS_RAPID_TRANSIT, BUS))
-                    }
-                }
-            }
-
-
-        } else {
-            if (tram) {
-                if (subway) {
-                    if (cableCar) {
-                        listList.add(listOf(METRO, TRAMWAY, CABLE_CAR))
-                    } else {
-                        listList.add(listOf(METRO, TRAMWAY))
-                    }
-                } else {
-                    if (cableCar) {
-                        listList.add(listOf(TRAMWAY, CABLE_CAR))
-                    } else {
-                        listList.add(listOf(TRAMWAY))
-                    }
-                }
-            } else {
-                if (subway) {
-                    if (cableCar) {
-                        listList.add(listOf(METRO, CABLE_CAR))
-                    } else {
-                        listList.add(listOf(METRO))
-                    }
-                } else {
-                    if (cableCar) {
-                        listList.add(listOf(CABLE_CAR))
-                    }
-                }
-
-            }
-        }
+        val transports = ArrayList<List<String>>()
+        if (bus) transports.add(listOf(SHUTTLE, BUS))
+        if (tram) transports.add(listOf(TRAMWAY, BUS_RAPID_TRANSIT))
+        if (subway) transports.add(listOf(METRO))
+        if (cableCar) transports.add(listOf(CABLE_CAR))
+        transports.add(transports.flatten())
 
 
         // <Plot a dit> : y'a pas de tram a toulouse donc le mode de transport 2 ne sert à rien
@@ -192,9 +133,9 @@ class MainActivity : AppCompatActivity() {
             date.plusMinutes(40),
         )
 
-        for (list in listList)
-            for (newDate in listDate)
-                aRouting(geoPointStart, geoPointEnd, roadMode, file, newDate, list)
+        for (newDate in listDate)
+            for (transport in transports)
+                aRouting(geoPointStart, geoPointEnd, roadMode, file, newDate, transport)
 
         drawJourney(selectBest(file).road)
     }
@@ -245,7 +186,8 @@ class MainActivity : AppCompatActivity() {
                 val units =
                     chunk.service.duration.split(":".toRegex()).dropLastWhile { it.isEmpty() }
                         .toTypedArray()
-                val duration = 3600 * units[0].toInt() + 60 * units[1].toInt() + units[2].toInt()
+                val duration =
+                    3600 * units[0].toInt() + 60 * units[1].toInt() + units[2].toInt()
                 roadNode.mDuration = duration.toDouble()
                 roadNode.mLocation = GeoPoint(lat.toDouble(), long.toDouble())
                 road.mNodes.add(roadNode)
@@ -260,7 +202,8 @@ class MainActivity : AppCompatActivity() {
                 val units =
                     chunk.street.duration.split(":".toRegex()).dropLastWhile { it.isEmpty() }
                         .toTypedArray()
-                val duration = 3600 * units[0].toInt() + 60 * units[1].toInt() + units[2].toInt()
+                val duration =
+                    3600 * units[0].toInt() + 60 * units[1].toInt() + units[2].toInt()
                 roadNode.mDuration = duration.toDouble()
                 roadNode.mLength = chunk.street.length.toDouble() / 1000
                 roadNode.mLocation = GeoPoint(
