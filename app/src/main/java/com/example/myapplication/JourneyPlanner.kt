@@ -4,10 +4,10 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
-import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import androidx.preference.PreferenceFragmentCompat
+import com.google.android.material.textfield.TextInputLayout
 
 class JourneyPlanner : AppCompatActivity() {
     private lateinit var button: Button
@@ -20,8 +20,8 @@ class JourneyPlanner : AppCompatActivity() {
     private lateinit var buttonCar: SwitchCompat
     private lateinit var buttonBike: SwitchCompat
 
-    private lateinit var edittextDep: EditText
-    private lateinit var edittextArv: EditText
+    private lateinit var edittextDep: TextInputLayout
+    private lateinit var edittextArv: TextInputLayout
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_journey_planner)
@@ -33,16 +33,16 @@ class JourneyPlanner : AppCompatActivity() {
         }
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        edittextDep = findViewById(R.id.editTextText)
-        edittextArv = findViewById(R.id.editTextText2)
+        edittextDep = findViewById(R.id.departure_place)
+        edittextArv = findViewById(R.id.arrival_place)
 
-        buttonBus = findViewById(R.id.busswitch)
-        buttonCableCar = findViewById(R.id.cablecarswitch)
-        buttonSubway = findViewById(R.id.subwaysswitch)
-        buttonTram = findViewById(R.id.tramswitch)
-        buttonWheelChair = findViewById(R.id.wheelchairswitch)
-        buttonCar = findViewById(R.id.carswitch)
-        buttonBike = findViewById(R.id.personalbycicleswitch)
+        buttonBus = findViewById(R.id.bus)
+        buttonCableCar = findViewById(R.id.cable_car)
+        buttonSubway = findViewById(R.id.subways)
+        buttonTram = findViewById(R.id.tram)
+        buttonWheelChair = findViewById(R.id.wheel_chair)
+        buttonCar = findViewById(R.id.car)
+        buttonBike = findViewById(R.id.personal_by_cycle)
 
         button = findViewById(R.id.search)
         button.setOnClickListener(this::activityResult)
@@ -50,8 +50,8 @@ class JourneyPlanner : AppCompatActivity() {
 
     private fun activityResult(view: View) {
         val intent = Intent()
-        intent.putExtra("Departure", edittextDep.text.toString())
-        intent.putExtra("Arrival", edittextArv.text.toString())
+        intent.putExtra("Departure", edittextDep.editText!!.text.toString())
+        intent.putExtra("Arrival", edittextArv.editText!!.text.toString())
         intent.putExtra("Bus", buttonBus.isChecked)
         intent.putExtra("Subway", buttonSubway.isChecked)
         intent.putExtra("CableCar", buttonCableCar.isChecked)

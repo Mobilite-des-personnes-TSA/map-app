@@ -26,4 +26,19 @@
     <string name="button">Button</string>
     <string name="trajet">Trajet</string>
     <string name="param_tre">Settings</string>
+    <string name="search">Search</string>
+    <string name="date">Date</string>
+    <string name="arrive_by">Arrive by</string>
+    <string name="leave_at">Leave at</string>
+    <string name="arrival_place">Arrivée</string>
+    <string name="departure_place">Départ</string>
+    <string name="title_activity_journey">Journey planner</string>
+    <string name="selected_mode">Selected mode</string>
+    <string name="car">car</string>
+    <string name="personal_by_cycle">personal bycicle</string>
+    <string name="tram">tram</string>
+    <string name="subways">subways</string>
+    <string name="bus">bus</string>
+    <string name="cable_car">cable car</string>
+    <string name="wheel_chair">wheel chair</string>
 </resources>
