@@ -255,9 +255,7 @@ class MainActivity : AppCompatActivity() {
             else -> roadManager.setMean(OSRMRoadManager.MEAN_BY_FOOT)
         }
 
-        val waypoints = ArrayList<GeoPoint>()
-        waypoints.add(startPoint)
-        waypoints.add(endPoint)
+       val waypoints = arrayListOf(startPoint, endPoint)
 
         val road = roadManager.getRoad(waypoints)
         val price = price(road)
