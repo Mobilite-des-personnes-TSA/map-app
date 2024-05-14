@@ -19,8 +19,8 @@ class JourneyPlanner : AppCompatActivity() {
     private lateinit var buttonCar: Chip
     private lateinit var buttonBike: Chip
 
-    private lateinit var edittextDep: TextInputLayout
-    private lateinit var edittextArv: TextInputLayout
+    private lateinit var editTextDep: TextInputLayout
+    private lateinit var editTextArv: TextInputLayout
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_journey_planner)
@@ -32,8 +32,8 @@ class JourneyPlanner : AppCompatActivity() {
         }
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        edittextDep = findViewById(R.id.departure_place)
-        edittextArv = findViewById(R.id.arrival_place)
+        editTextDep = findViewById(R.id.departure_place)
+        editTextArv = findViewById(R.id.arrival_place)
 
         buttonBus = findViewById(R.id.bus)
         buttonCableCar = findViewById(R.id.cable_car)
@@ -49,8 +49,8 @@ class JourneyPlanner : AppCompatActivity() {
 
     private fun activityResult() {
         val intent = Intent()
-        intent.putExtra("Departure", edittextDep.editText!!.text.toString())
-        intent.putExtra("Arrival", edittextArv.editText!!.text.toString())
+        intent.putExtra("Departure", editTextDep.editText!!.text.toString())
+        intent.putExtra("Arrival", editTextArv.editText!!.text.toString())
         intent.putExtra("Bus", buttonBus.isChecked)
         intent.putExtra("Subway", buttonSubway.isChecked)
         intent.putExtra("CableCar", buttonCableCar.isChecked)
