@@ -16,4 +16,6 @@
     <string name="button">Button</string>
     <string name="trajet">Trajet</string>
     <string name="param_tre">Paramètre</string>
+    <string name="arival_hint">Indiquer le nom du lieux d\'arrivée.</string>
+    <string name="departure_hint">Indiquer le nom du lieux de départ.</string>
 </resources>

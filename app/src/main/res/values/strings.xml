@@ -41,4 +41,6 @@
     <string name="bus">bus</string>
     <string name="cable_car">cable car</string>
     <string name="wheel_chair">wheel chair</string>
+    <string name="arival_hint">Indiquer le nom du lieux d\'arrivée.</string>
+    <string name="departure_hint">Indiquer le nom du lieux de départ.</string>
 </resources>

@@ -2,6 +2,7 @@ package com.example.myapplication
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -44,6 +45,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var buttonSettings: Button
     private val tisseoDateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
 
+    private lateinit var markerNormal: Drawable
+    private lateinit var markerDanger: Drawable
+
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
@@ -65,6 +69,24 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, SettingsActivity::class.java)
             startActivity(intent)
         }
+
+        markerNormal =
+            ResourcesCompat.getDrawable(resources, R.drawable.map_marker_outline, theme)!!
+        markerNormal.setTint(
+            ResourcesCompat.getColor(
+                resources,
+                com.google.android.material.R.color.foreground_material_light,
+                theme
+            )
+        )
+        markerDanger = ResourcesCompat.getDrawable(resources, R.drawable.map_marker_alert, theme)!!
+        markerDanger.setTint(
+            ResourcesCompat.getColor(
+                resources,
+                com.google.android.material.R.color.error_color_material_light,
+                theme
+            )
+        )
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.topView)) { view, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -254,7 +276,7 @@ class MainActivity : AppCompatActivity() {
             else -> roadManager.setMean(OSRMRoadManager.MEAN_BY_FOOT)
         }
 
-       val waypoints = arrayListOf(startPoint, endPoint)
+        val waypoints = arrayListOf(startPoint, endPoint)
 
         val road = roadManager.getRoad(waypoints)
         val price = price(road)
@@ -335,10 +357,7 @@ class MainActivity : AppCompatActivity() {
         val roadOverlay: Polyline = RoadManager.buildRoadOverlay(road)
         map.overlays.clear()
         map.overlays.add(roadOverlay)
-        val nodeIconNormal =
-            ResourcesCompat.getDrawable(resources, R.drawable.normal_marker_node, theme)
-        val nodeIconDanger =
-            ResourcesCompat.getDrawable(resources, R.drawable.danger_marker_node, theme)
+
 
         for (i in road.mNodes.indices) {
             Log.d(
@@ -352,10 +371,10 @@ class MainActivity : AppCompatActivity() {
             nodeMarker.title = "Step $i"
 
             if (node.mManeuverType == 1) {
-                nodeMarker.icon = nodeIconNormal
+                nodeMarker.icon = markerNormal
                 nodeMarker.snippet = node.mInstructions
             } else {
-                nodeMarker.icon = nodeIconDanger
+                nodeMarker.icon = markerDanger
                 var string = ""
 
                 if ((node.mManeuverType % 2) == 0) {
@@ -393,9 +412,11 @@ class MainActivity : AppCompatActivity() {
                                 it.getBooleanExtra("Subway", true).also { subway ->
                                     it.getBooleanExtra("CableCar", true).also { cableCar ->
                                         it.getBooleanExtra("Tram", true).also { tram ->
-                                            it.getBooleanExtra("WheelChair", false).also { wheelChair ->
+                                            it.getBooleanExtra("WheelChair", false)
+                                                .also { wheelChair ->
                                                     it.getBooleanExtra("Car", false).also { car ->
-                                                        it.getBooleanExtra("Bike", false).also { bike ->
+                                                        it.getBooleanExtra("Bike", false)
+                                                            .also { bike ->
                                                                 Thread {
                                                                     tisseoRouting(
                                                                         departureAddress,

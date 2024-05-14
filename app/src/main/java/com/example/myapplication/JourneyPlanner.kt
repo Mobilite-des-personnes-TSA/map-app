@@ -5,20 +5,20 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.SwitchCompat
 import androidx.preference.PreferenceFragmentCompat
+import com.google.android.material.chip.Chip
 import com.google.android.material.textfield.TextInputLayout
 
 class JourneyPlanner : AppCompatActivity() {
     private lateinit var button: Button
 
-    private lateinit var buttonSubway: SwitchCompat
-    private lateinit var buttonBus: SwitchCompat
-    private lateinit var buttonCableCar: SwitchCompat
-    private lateinit var buttonTram: SwitchCompat
-    private lateinit var buttonWheelChair: SwitchCompat
-    private lateinit var buttonCar: SwitchCompat
-    private lateinit var buttonBike: SwitchCompat
+    private lateinit var buttonSubway: Chip
+    private lateinit var buttonBus: Chip
+    private lateinit var buttonCableCar: Chip
+    private lateinit var buttonTram: Chip
+    private lateinit var buttonWheelChair: Chip
+    private lateinit var buttonCar: Chip
+    private lateinit var buttonBike: Chip
 
     private lateinit var edittextDep: TextInputLayout
     private lateinit var edittextArv: TextInputLayout
