@@ -5,7 +5,6 @@ import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
-import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import androidx.activity.enableEdgeToEdge
@@ -62,7 +61,7 @@ class MainActivity : AppCompatActivity() {
         mapController.setCenter(startCenterPoint)
 
         buttonJourneyPlanner = findViewById(R.id.button_journey_planner)
-        buttonJourneyPlanner.setOnClickListener(this::openJourneyPlanner)
+        buttonJourneyPlanner.setOnClickListener { openJourneyPlanner() }
 
         buttonSettings = findViewById(R.id.button_settings)
         buttonSettings.setOnClickListener {
@@ -397,7 +396,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun openJourneyPlanner(@Suppress("UNUSED_PARAMETER") view: View) {
+    private fun openJourneyPlanner() {
         val intent = Intent(this, JourneyPlanner::class.java)
         resultJourneyPlanner.launch(intent)
     }
