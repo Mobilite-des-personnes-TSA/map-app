@@ -248,19 +248,11 @@ class MainActivity : AppCompatActivity() {
         file: MutableList<RoadNodeForRouting>
     ) {
 
-        val roadManager: RoadManager = OSRMRoadManager(this, "User")
+        val roadManager = OSRMRoadManager(this, "User")
         when (mode) {
-            "bike" -> {
-                (roadManager as OSRMRoadManager).setMean(OSRMRoadManager.MEAN_BY_BIKE)
-            }
-
-            "car" -> {
-                (roadManager as OSRMRoadManager).setMean(OSRMRoadManager.MEAN_BY_CAR)
-            }
-
-            else -> {
-                (roadManager as OSRMRoadManager).setMean(OSRMRoadManager.MEAN_BY_FOOT)
-            }
+            "bike" -> roadManager.setMean(OSRMRoadManager.MEAN_BY_BIKE)
+            "car" -> OSRMRoadManager).setMean(OSRMRoadManager.MEAN_BY_CAR)
+            else -> roadManager.setMean(OSRMRoadManager.MEAN_BY_FOOT)
         }
 
         val waypoints = ArrayList<GeoPoint>()
