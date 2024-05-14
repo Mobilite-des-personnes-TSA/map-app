@@ -121,8 +121,7 @@ class MainActivity : AppCompatActivity() {
             date.plusMinutes(40),
         )
 
-        val roadModeList = ArrayList<String>()
-        roadModeList.add("walk")
+        val roadModeList = mutableListOf("walk")
         if (bike) roadModeList.add("bike")
         if (wheelChair) roadModeList.add("wheelchair")
 
