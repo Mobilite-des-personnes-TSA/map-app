@@ -121,8 +121,7 @@ class MainActivity : AppCompatActivity() {
             date.plusMinutes(40),
         )
 
-        val roadModeList = ArrayList<String>()
-        roadModeList.add("walk")
+        val roadModeList = mutableListOf("walk")
         if (bike) roadModeList.add("bike")
         if (wheelChair) roadModeList.add("wheelchair")
 
@@ -248,24 +247,14 @@ class MainActivity : AppCompatActivity() {
         file: MutableList<RoadNodeForRouting>
     ) {
 
-        val roadManager: RoadManager = OSRMRoadManager(this, "User")
+        val roadManager = OSRMRoadManager(this, "User")
         when (mode) {
-            "bike" -> {
-                (roadManager as OSRMRoadManager).setMean(OSRMRoadManager.MEAN_BY_BIKE)
-            }
-
-            "car" -> {
-                (roadManager as OSRMRoadManager).setMean(OSRMRoadManager.MEAN_BY_CAR)
-            }
-
-            else -> {
-                (roadManager as OSRMRoadManager).setMean(OSRMRoadManager.MEAN_BY_FOOT)
-            }
+            "bike" -> roadManager.setMean(OSRMRoadManager.MEAN_BY_BIKE)
+            "car" -> OSRMRoadManager).setMean(OSRMRoadManager.MEAN_BY_CAR)
+            else -> roadManager.setMean(OSRMRoadManager.MEAN_BY_FOOT)
         }
 
-        val waypoints = ArrayList<GeoPoint>()
-        waypoints.add(startPoint)
-        waypoints.add(endPoint)
+       val waypoints = arrayListOf(startPoint, endPoint)
 
         val road = roadManager.getRoad(waypoints)
         val price = price(road)
