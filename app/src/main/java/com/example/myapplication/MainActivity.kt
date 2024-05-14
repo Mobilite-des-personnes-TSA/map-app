@@ -250,7 +250,7 @@ class MainActivity : AppCompatActivity() {
         val roadManager = OSRMRoadManager(this, "User")
         when (mode) {
             "bike" -> roadManager.setMean(OSRMRoadManager.MEAN_BY_BIKE)
-            "car" -> OSRMRoadManager).setMean(OSRMRoadManager.MEAN_BY_CAR)
+            "car" -> roadManager.setMean(OSRMRoadManager.MEAN_BY_CAR)
             else -> roadManager.setMean(OSRMRoadManager.MEAN_BY_FOOT)
         }
 
