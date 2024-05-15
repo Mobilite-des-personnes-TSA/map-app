@@ -2,6 +2,7 @@ package com.example.myapplication
 
 import android.app.Activity
 import android.content.Intent
+import android.content.SharedPreferences
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
@@ -47,10 +48,15 @@ class MainActivity : AppCompatActivity() {
     private lateinit var markerNormal: Drawable
     private lateinit var markerDanger: Drawable
 
+    private lateinit var sharedPreferences : SharedPreferences
+
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
+
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+
         super.onCreate(savedInstanceState)
-        getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this))
+        getInstance().load(this, sharedPreferences)
         setContentView(R.layout.activity_main)
 
         map = findViewById(R.id.map)
@@ -282,6 +288,9 @@ class MainActivity : AppCompatActivity() {
         file.add(RoadNodeForRouting(road, price))
     }
 
+    private fun price(road: Road) = road.mNodes.sumOf {
+        (crowd(it) + light(it) + sound(it)) * it.mLength
+    }
 
     /*
         Le but de cette fonction est de calculer à qu'elle point un chemin est pénible
@@ -292,26 +301,21 @@ class MainActivity : AppCompatActivity() {
 
         nous avons donc décidé de la représenter par une fonction exponentielle sur chaque critère
      */
-    private fun price(road: Road) = road.mNodes.sumOf {
-        (exp(crown(it)) + exp(light(it)) + exp(sound(it))) * it.mLength
-    }
-
     /*
-        Ces fonctions servent à redonner les informations sur les routes
-        et de les comparer aux sensibilités de l'utilisateur
+        On en profite aussi pour définir les points de sensibilité
      */
 
-    private fun crown(roadNode: RoadNode): Double {
-        val out =
+    private fun crowd(roadNode: RoadNode): Double {
+        val out = exp(
             if ((43.55 < roadNode.mLocation.latitude && roadNode.mLocation.latitude < 43.65) &&
                 (1.4 < roadNode.mLocation.longitude && roadNode.mLocation.longitude < 1.5)
             ) {
-                Math.random() * 2 + 1
+                (Math.random() * 2 + 1)* sharedPreferences.getInt("crowd",0)
             } else {
                 Math.random()
-            }
+            })
 
-        if (out > 2) { //TODO : caller ce nombre en fonction de la sensibiliter des utilisateurs
+        if (out  > 10) {
             roadNode.mManeuverType *= 2
         }
 
@@ -319,16 +323,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun light(roadNode: RoadNode): Double {
-        val out =
+        val out =exp(
             if ((43.55 < roadNode.mLocation.latitude && roadNode.mLocation.latitude < 43.65) &&
                 (1.4 < roadNode.mLocation.longitude && roadNode.mLocation.longitude < 1.5)
             ) {
-                Math.random() * 2 + 1
+                (Math.random() * 2 + 1)* sharedPreferences.getInt("light",0)
             } else {
                 Math.random()
-            }
+            })
 
-        if (out > 2) { //TODO : caller ce nombre en fonction de la sensibiliter des utilisateurs
+        if (out  > 10) {
             roadNode.mManeuverType *= 3
         }
 
@@ -336,16 +340,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun sound(roadNode: RoadNode): Double {
-        val out =
+        val out =exp(
             if ((43.55 < roadNode.mLocation.latitude && roadNode.mLocation.latitude < 43.65) &&
                 (1.4 < roadNode.mLocation.longitude && roadNode.mLocation.longitude < 1.5)
             ) {
-                Math.random() * 2 + 1
+                (Math.random() * 2 + 1) * sharedPreferences.getInt("sound",0)
             } else {
                 Math.random()
-            }
+            })
 
-        if (out > 2) { //TODO : caller ce nombre en fonction de la sensibiliter des utilisateurs
+        if (out > 10) {
             roadNode.mManeuverType *= 5
         }
         return out
