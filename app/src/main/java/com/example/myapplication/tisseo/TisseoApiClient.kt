@@ -2,6 +2,7 @@ package com.example.myapplication.tisseo
 
 import android.net.Uri
 import android.util.Log
+import com.example.myapplication.BuildConfig
 import android.window.OnBackInvokedDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -34,27 +35,21 @@ data class Node(
 )
 
 object TisseoApiClient {
-
-    var API_KEY = "e9a7d698-8e62-4400-b0e3-8167d2971b57"
-
     private val apiEntryUri =
         Uri.Builder().scheme("https").authority("api.tisseo.fr").appendPath("v2")
-            .appendQueryParameter("key", BuildConfig.TISSEO_API_KEY).build()
+            .appendQueryParameter("key", com.example.myapplication.BuildConfig.TISSEO_API_KEY).build()
 
-    /** TODO: Couroutine and flows
-     *
-     */
     private suspend fun <T> executeGetRequest(deserializer: DeserializationStrategy<T>, uri: Uri, dispatcher: CoroutineDispatcher): T? {
         Log.d("TisseoApiClient", "Request: $uri")
-
+        var responseData : String? = null
         // Blocking operation
         withContext(dispatcher) {
             val connection = URL(uri.toString()).openConnection() as HttpsURLConnection
-
             val responseCode = connection.responseCode
             if (responseCode == HttpsURLConnection.HTTP_OK) {
-                val responseData = try {
-                    BufferedInputStream(connection.inputStream).bufferedReader().use { it.readText() }
+                 responseData = try {
+                    BufferedInputStream(connection.inputStream).bufferedReader()
+                        .use { it.readText() }
                 } catch (e: IOException) {
                     Log.wtf("TisseoApiClient", e.message, e)
                     null
@@ -66,18 +61,16 @@ object TisseoApiClient {
                 println("API request failed with response code: $responseCode")
             }
         }
-
         Log.d("TisseoApiClient", "Response Data: $responseData")
         return responseData?.let { Json.decodeFromString(deserializer, it) }
     }
 
 
     /** Adapt the Tisseo API response type to ours
-     * TODO: Reassess the serialization process
      */
     @ExperimentalSerializationApi
     suspend fun places(
-        term: String ="", coordinatesXY : String ="", lang: String = "fr",
+        term: String = "", coordinatesXY: String = "", lang: String = "fr",
         dispatcher: CoroutineDispatcher
     ) = executeGetRequest(
         PlacesResponse.serializer(),
@@ -102,6 +95,8 @@ object TisseoApiClient {
         arrivalPlace: String,
         roadMode: String,
         number: String,
+        firstDepartureDatetime: String,
+        rollingStockList: String = "commercial_mode:1,commercial_mode:3,commercial_mode:2",
         dispatcher: CoroutineDispatcher,              //   Do I keep this as a dependency ?
         displayWording: String = "1",
         lang: String = "fr"
@@ -110,10 +105,12 @@ object TisseoApiClient {
         apiEntryUri.buildUpon().appendPath("journeys.json")
             .appendQueryParameter("departurePlaceXY", departurePlace)
             .appendQueryParameter("arrivalPlaceXY", arrivalPlace)
-            .appendQueryParameter("roadMode", roadMode).appendQueryParameter("number", number)
+            .appendQueryParameter("firstDepartureDatetime", firstDepartureDatetime)
+            .appendQueryParameter("roadMode", roadMode)
+            .appendQueryParameter("rollingStockList", rollingStockList)
+            .appendQueryParameter("number", number)
             .appendQueryParameter("displayWording", displayWording)
             .appendQueryParameter("lang", lang).build(),
         dispatcher
     )
-
 }

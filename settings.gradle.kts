@@ -1,3 +1,6 @@
+import org.gradle.internal.impldep.junit.runner.Version.id
+import org.gradle.kotlin.dsl.accessors.runtime.externalModuleDependencyFor
+
 pluginManagement {
     repositories {
         google {

@@ -14,6 +14,14 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeFormatterBuilder
 
+const val METRO = "commercial_mode:1"
+const val TRAMWAY = "commercial_mode:2"
+const val CABLE_CAR = "commercial_mode:6"
+const val BUS_RAPID_TRANSIT = "commercial_mode:10"
+const val BUS = "commercial_mode:3"
+const val SHUTTLE = "commercial_mode:9"
+const val DEMAND_RESPONSIVE_TRANSPORT = "commercial_mode:4"
+
 
 object LocalDateTimeSerializer : KSerializer<LocalDateTime> {
     private val ISO_LOCAL_DATE_TIME =
@@ -291,8 +299,8 @@ data class JourneyResponse(
 
                     @Serializable
                     data class Street(
-                        val arrivalTime:String,
-                        val departureTime:String,
+                        val arrivalTime: String,
+                        val departureTime: String,
                         val duration: String,
                         val length: String,
                         val wkt: String,
@@ -374,7 +382,7 @@ data class JourneyResponse(
                                 val bgXmlColor: String,
                                 val fgXmlColor: String,
                                 val transportMode: Line.TransportMode,
-                                val message: List<Line.Message>? =null,
+                                val message: List<Line.Message>? = null,
                                 @SerialName("service_number") val serviceNumber: String,
                                 val specificPricing: String,
                                 val style: String

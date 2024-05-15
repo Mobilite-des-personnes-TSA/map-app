@@ -7,31 +7,34 @@
 
     <fragment
         android:id="@+id/navigation_home"
-        android:name="com.example.myapplication.ui.home.HomeFragment"
-        android:label="@string/title_home"
+        android:name="com.example.myapplication.navigationRouting.home.HomeFragment"
+        android:label="@string/title_fragment_home"
         tools:layout="@layout/fragment_home" >
         <action
-            android:id="@+id/action_navigation_home_to_navigation_journey_planner"
+            android:id="@+id/action_home_to_journey_planner"
             app:destination="@id/navigation_journey_planner" />
     </fragment>
 
     <fragment
         android:id="@+id/navigation_journey_planner"
-        android:name="com.example.myapplication.ui.journeyPlanner.JourneyPlannerFragment"
-        android:label="@string/title_dashboard"
+        android:name="com.example.myapplication.navigationRouting.journeyPlanner.JourneyPlannerFragment"
+        android:label="@string/title_fragment_journey_planner"
         tools:layout="@layout/fragment_journey_planner" >
         <action
-            android:id="@+id/action_navigation_journey_planner_to_navigation_map_display"
+            android:id="@+id/action_journey_planner_to_map_display"
             app:destination="@id/navigation_map_display" />
     </fragment>
 
     <fragment
         android:id="@+id/navigation_map_display"
-        android:name="com.example.myapplication.ui.mapDisplay.MapDisplayFragment"
-        android:label="@string/title_notifications"
+        android:name="com.example.myapplication.navigationRouting.mapDisplay.MapDisplayFragment"
+        android:label="@string/title_fragment_map_display"
         tools:layout="@layout/fragment_map_display" >
         <action
-            android:id="@+id/action_navigation_map_display_to_navigation_journey_planner2"
+            android:id="@+id/action_map_display_to_journey_planner"
             app:destination="@id/navigation_journey_planner" />
+        <argument
+            android:name="roadToDraw"
+            app:argType="org.osmdroid.bonuspack.routing.Road" />
     </fragment>
 </navigation>

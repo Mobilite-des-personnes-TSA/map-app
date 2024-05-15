@@ -1,4 +1,4 @@
-package com.example.myapplication.ui.home
+package com.example.myapplication.navigationRouting.home
 
 import android.os.Bundle
 import android.view.LayoutInflater

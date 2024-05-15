@@ -1,65 +1,38 @@
-<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory app:title="@string/messages_header">
+    <PreferenceCategory
+        app:title="@string/title_sensibility_global"
+        app:summary="@string/summary_sensibility_global">
 
-        <EditTextPreference
-            app:key="signature"
-            app:title="@string/signature_title"
-            app:useSimpleSummaryProvider="true" />
+        <SeekBarPreference
+            android:layout_width="match_parent"
+            android:defaultValue="0"
+            android:max="5"
+            app:key="noise"
+            app:icon="@drawable/rounded_brand_awareness_24"
+            app:showSeekBarValue="true"
+            app:summary="@string/summary_sensibility_noise"
+            app:title="@string/title_sensibility_noise" />
 
-        <ListPreference
-            app:defaultValue="reply"
-            app:entries="@array/reply_entries"
-            app:entryValues="@array/reply_values"
-            app:key="reply"
-            app:title="@string/reply_title"
-            app:useSimpleSummaryProvider="true" />
 
-    </PreferenceCategory>
+        <SeekBarPreference
+            android:defaultValue="0"
+            android:max="5"
+            app:key="crowd"
+            app:icon="@drawable/rounded_groups_24"
+            app:showSeekBarValue="true"
+            app:summary="@string/summary_sensibility_crowd"
+            app:title="@string/title_sensibility_crowd" />
 
-    <PreferenceCategory app:title="@string/sync_header">
-
-        <SwitchPreferenceCompat
-            app:key="sync"
-            app:title="@string/sync_title" />
-
-        <SwitchPreferenceCompat
-            app:dependency="sync"
-            app:key="attachment"
-            app:summaryOff="@string/attachment_summary_off"
-            app:summaryOn="@string/attachment_summary_on"
-            app:title="@string/attachment_title" />
-
-    </PreferenceCategory><PreferenceCategory
-        app:title="@string/messages_header">
-
-        <EditTextPreference
-            app:key="signature"
-            app:title="@string/signature_title"
-            app:useSimpleSummaryProvider="true"/>
-
-        <ListPreference
-            app:key="reply"
-            app:title="@string/reply_title"
-            app:entries="@array/reply_entries"
-            app:entryValues="@array/reply_values"
-            app:defaultValue="reply"
-            app:useSimpleSummaryProvider="true"/>
-
-    </PreferenceCategory><PreferenceCategory
-        app:title="@string/sync_header">
-
-        <SwitchPreferenceCompat
-            app:key="sync"
-            app:title="@string/sync_title"/>
-
-        <SwitchPreferenceCompat
-            app:key="attachment"
-            app:title="@string/attachment_title"
-            app:summaryOn="@string/attachment_summary_on"
-            app:summaryOff="@string/attachment_summary_off"
-            app:dependency="sync"/>
+        <SeekBarPreference
+            android:defaultValue="0"
+            android:max="5"
+            app:key="light"
+            app:icon="@drawable/rounded_light_mode_24"
+            app:showSeekBarValue="true"
+            app:summary="@string/summary_sensibility_light"
+            app:title="@string/title_sensibility_light" />
 
     </PreferenceCategory>
-
 </PreferenceScreen>

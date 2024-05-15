@@ -1,5 +1,0 @@
-/* Copy this file to TisseoConstants.kt and replace YOUR_API_KEY */
-
-package com.example.myapplication.tisseo
-
-internal const val API_KEY = "YOUR_API_KEY_HERE"

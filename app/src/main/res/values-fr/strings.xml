@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">My Application</string>
+    <string name="action_settings">Paramètre</string>
+    <string name="title_activity_setting">Paramètre</string>t
+    <string name="title_activity_routing">Recherche de trajet</string>
+    <string name="title_fragment_journey_planner">Calcul de trajet</string>
+    <string name="title_fragment_map_display">Affichage de carte</string>
+    <string name="title_fragment_home">Acceuil</string>
+
+    <string name="to_journey_action">Chercher un itinéraire</string>
+    <string name="search">Rechercher</string>
+
+    <string name="date">Date</string>
+    <string name="arrive_by">Arrivée à</string>
+    <string name="leave_at">Départ à</string>
+    <string name="arrival_place">Lieux d\'arrivée</string>
+    <string name="departure_place">Lieux de départ</string>
+    <string name="arrival_hint">Indiquer le nom du lieux d\'arrivée.</string>
+    <string name="departure_hint">Indiquer le nom du lieux de départ.</string>
+
+    <string name="car">Voiture</string>
+    <string name="personal_by_cycle">Vélo</string>
+    <string name="tram">Tramways</string>
+    <string name="subways">Métros</string>
+    <string name="bus">Bus</string>
+    <string name="cable_car">Téléphérique</string>
+    <string name="wheel_chair">Accessible en chaise roulante</string>
+
+    <string name="summary_sensibility_global">Les éléments de la ville que je veux éviter.</string>
+    <string name="title_sensibility_global">Sensibilité</string>
+    <string name="title_sensibility_light">Sensibilité à la lumière</string>
+    <string name="summary_sensibility_light">A quel point je me sens pas à l\'aise quand il y\'a de la lumière</string>
+    <string name="title_sensibility_crowd">Sensibilité à la foule</string>
+    <string name="summary_sensibility_crowd">A quel point je me sens pas à l\'aise quand il y\'a du monde</string>
+    <string name="title_sensibility_noise">Sensibilité au bruit</string>
+    <string name="summary_sensibility_noise">A quel point je me sens pas à l\'aise quand il y\'a du bruit</string>
+</resources>
