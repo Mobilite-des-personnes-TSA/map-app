@@ -10,7 +10,9 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.JsonClassDiscriminator
+import java.time.Duration
 import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeFormatterBuilder
 
@@ -29,7 +31,7 @@ object LocalDateTimeSerializer : KSerializer<LocalDateTime> {
             .appendLiteral(' ').append(DateTimeFormatter.ISO_LOCAL_TIME).toFormatter()
 
     override val descriptor: SerialDescriptor =
-        PrimitiveSerialDescriptor("LocalDateTime", PrimitiveKind.STRING)
+        PrimitiveSerialDescriptor("TisseoLocalDateTime", PrimitiveKind.STRING)
 
     override fun serialize(encoder: Encoder, value: LocalDateTime) =
         encoder.encodeString(value.format(ISO_LOCAL_DATE_TIME))
@@ -38,6 +40,17 @@ object LocalDateTimeSerializer : KSerializer<LocalDateTime> {
     override fun deserialize(decoder: Decoder) =
         LocalDateTime.parse(decoder.decodeString(), ISO_LOCAL_DATE_TIME)!!
 
+}
+
+object DurationSerializer : KSerializer<Duration> {
+    override val descriptor: SerialDescriptor =
+        PrimitiveSerialDescriptor("TisseoDuration", PrimitiveKind.STRING)
+
+    override fun serialize(encoder: Encoder, value: Duration) =
+        encoder.encodeString(LocalTime.MIN.plus(value).toString())
+
+    override fun deserialize(decoder: Decoder) =
+        Duration.between(LocalTime.MIN, LocalTime.parse(decoder.decodeString()))
 }
 
 
@@ -97,7 +110,7 @@ data class Line(
 
 
 @Serializable
-@ExperimentalSerializationApi
+@OptIn(ExperimentalSerializationApi::class)
 data class PlacesResponse(
     @Serializable(with = LocalDateTimeSerializer::class) val expirationDate: LocalDateTime,
     val placesList: PlacesList
@@ -276,122 +289,7 @@ data class JourneyResponse(
         @Serializable
         data class JourneyItem(
             val journey: Journey
-        ) {
-            @Serializable
-            data class Journey(
-                @Serializable(with = LocalDateTimeSerializer::class) val arrivalDateTime: LocalDateTime,
-                val arrivalText: Text? = null,
-                val chunks: List<Chunk>,
-                @SerialName("co2_emissions") val co2Emissions: String,
-                @Serializable(with = LocalDateTimeSerializer::class) val departureDateTime: LocalDateTime,
-                val duration: String
-            ) {
-
-                @Serializable
-                data class Text(
-                    val lang: String, val text: String
-                )
-
-                @Serializable
-                data class Chunk(
-                    val stop: Stop? = null, val service: Service? = null, val street: Street? = null
-                ) {
-
-                    @Serializable
-                    data class Street(
-                        val arrivalTime: String,
-                        val departureTime: String,
-                        val duration: String,
-                        val length: String,
-                        val wkt: String,
-                        val roadMode: String,
-                        val startAddress: StartAddress,
-                        val endAddress: EndAddress,
-                        val text: Text
-                    ) {
-                        @Serializable
-                        data class StartAddress(
-                            val connectionPlace: ConnectionPlace
-                        ) {
-                            @Serializable
-                            data class ConnectionPlace(
-                                val latitude: String, val longitude: String
-                            )
-                        }
-
-                        @Serializable
-                        data class EndAddress(
-                            val address: Address
-                        ) {
-                            @Serializable
-                            data class Address(
-                                val latitude: String, val longitude: String, val streetName: String
-                            )
-                        }
-                    }
-
-                    @Serializable
-                    data class Stop(
-                        @SerialName("arrival_id") val arrivalId: String,
-                        val connectionPlace: ConnectionPlace,
-                        @SerialName("departure_id") val departureId: String,
-                        val firstTime: String,
-                        val lastTime: String,
-                        val latitude: String,
-                        val longitude: String,
-                        val name: String,
-                        val text: Text? = null
-                    ) {
-                        @Serializable
-                        data class ConnectionPlace(
-                            val city: String,
-                            val id: String,
-                            val latitude: String,
-                            val longitude: String,
-                            val name: String,
-                            val x: String,
-                            val y: String
-                        )
-                    }
-
-                    @Serializable
-                    data class Service(
-                        val destinationStop: DestinationStop,
-                        val duration: String,
-                        val firstArrivalTime: String,
-                        val firstDepartureTime: String,
-                        val isContinuousService: String,
-                        val lastArrivalTime: String,
-                        val lastDepartureTime: String,
-                        val maxWaitingTime: String,
-                        val name: String,
-                        val text: Text? = null,
-                        val wkt: String
-                    ) {
-                        @Serializable
-                        data class DestinationStop(
-                            val id: String, val line: DestinationLine, val name: String
-                        ) {
-                            @Serializable
-                            data class DestinationLine(
-                                val id: String,
-                                val shortName: String,
-                                val name: String,
-                                val network: String,
-                                val color: String,
-                                val bgXmlColor: String,
-                                val fgXmlColor: String,
-                                val transportMode: Line.TransportMode,
-                                val message: List<Line.Message>? = null,
-                                @SerialName("service_number") val serviceNumber: String,
-                                val specificPricing: String,
-                                val style: String
-                            )
-                        }
-                    }
-                }
-            }
-        }
+        )
 
         @Serializable
         data class Query(
@@ -416,6 +314,122 @@ data class JourneyResponse(
             data class TimeBounds(
                 val maxDepartureHour: String, val minArrivalHour: String
             )
+        }
+    }
+}
+
+
+@Serializable
+data class Journey(
+    @Serializable(with = LocalDateTimeSerializer::class) val arrivalDateTime: LocalDateTime,
+    val arrivalText: Text? = null,
+    val chunks: List<Chunk>,
+    @SerialName("co2_emissions") val co2Emissions: String,
+    @Serializable(with = LocalDateTimeSerializer::class) val departureDateTime: LocalDateTime,
+    val duration: String
+) {
+
+    @Serializable
+    data class Text(
+        val lang: String, val text: String
+    )
+
+    @Serializable
+    data class Chunk(
+        val stop: Stop? = null, val service: Service? = null, val street: Street? = null
+    ) {
+
+        @Serializable
+        data class Street(
+            val arrivalTime: String,
+            val departureTime: String,
+            @Serializable(with = DurationSerializer::class) val duration: Duration,
+            val length: String,
+            val wkt: String,
+            val roadMode: String,
+            val startAddress: StartAddress,
+            val endAddress: EndAddress,
+            val text: Text
+        ) {
+            @Serializable
+            data class StartAddress(
+                val connectionPlace: ConnectionPlace
+            ) {
+                @Serializable
+                data class ConnectionPlace(
+                    val latitude: String, val longitude: String
+                )
+            }
+
+            @Serializable
+            data class EndAddress(
+                val address: Address
+            ) {
+                @Serializable
+                data class Address(
+                    val latitude: String, val longitude: String, val streetName: String
+                )
+            }
+        }
+
+        @Serializable
+        data class Stop(
+            @SerialName("arrival_id") val arrivalId: String,
+            val connectionPlace: ConnectionPlace,
+            @SerialName("departure_id") val departureId: String,
+            val firstTime: String,
+            val lastTime: String,
+            val latitude: String,
+            val longitude: String,
+            val name: String,
+            val text: Text
+        ) {
+            @Serializable
+            data class ConnectionPlace(
+                val city: String,
+                val id: String,
+                val latitude: String,
+                val longitude: String,
+                val name: String,
+                val x: String,
+                val y: String
+            )
+        }
+
+        @Serializable
+        data class Service(
+            val destinationStop: DestinationStop,
+            @Serializable(with = DurationSerializer::class) val duration: Duration,
+            val firstArrivalTime: String,
+            val firstDepartureTime: String,
+            val isContinuousService: String,
+            val lastArrivalTime: String,
+            val lastDepartureTime: String,
+            val maxWaitingTime: String,
+            val name: String,
+            val text: Text,
+            val wkt: String
+        ) {
+            @Serializable
+            data class DestinationStop(
+                val id: String, val line: DestinationLine, val name: String
+            ) {
+                @Serializable
+                data class DestinationLine(
+                    val id: String,
+                    val shortName: String,
+                    val name: String,
+                    val network: String,
+                    val color: String,
+                    val bgXmlColor: String,
+                    val fgXmlColor: String,
+                    val transportMode: Line.TransportMode,
+                    val message: List<Line.Message>? = null,
+                    @SerialName("service_number") val serviceNumber: String,
+                    val specificPricing: String,
+                    val style: String
+                )
+            }
         }
     }
 }

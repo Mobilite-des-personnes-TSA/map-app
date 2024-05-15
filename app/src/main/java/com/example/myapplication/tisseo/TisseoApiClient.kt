@@ -4,7 +4,6 @@ import android.net.Uri
 import android.util.Log
 import com.example.myapplication.BuildConfig
 import kotlinx.serialization.DeserializationStrategy
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import java.io.BufferedInputStream
 import java.io.IOException
@@ -33,7 +32,6 @@ object TisseoApiClient {
     }
 
 
-    @ExperimentalSerializationApi
     fun places(
         term: String = "", coordinatesXY: String = "", lang: String = "fr",
     ) = executeGetRequest(

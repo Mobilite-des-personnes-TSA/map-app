@@ -3,11 +3,14 @@ package com.example.myapplication
 import android.app.Activity
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.res.Resources.NotFoundException
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.os.Looper
 import android.util.Log
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -19,12 +22,11 @@ import androidx.preference.PreferenceManager
 import com.example.myapplication.tisseo.BUS
 import com.example.myapplication.tisseo.BUS_RAPID_TRANSIT
 import com.example.myapplication.tisseo.CABLE_CAR
-import com.example.myapplication.tisseo.JourneyResponse
 import com.example.myapplication.tisseo.METRO
 import com.example.myapplication.tisseo.SHUTTLE
 import com.example.myapplication.tisseo.TRAMWAY
 import com.example.myapplication.tisseo.TisseoApiClient
-import kotlinx.serialization.ExperimentalSerializationApi
+import com.example.myapplication.tisseo.TisseoOsrmUtils
 import org.osmdroid.bonuspack.routing.OSRMRoadManager
 import org.osmdroid.bonuspack.routing.Road
 import org.osmdroid.bonuspack.routing.RoadManager
@@ -48,7 +50,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var markerNormal: Drawable
     private lateinit var markerDanger: Drawable
 
-    private lateinit var sharedPreferences : SharedPreferences
+    private lateinit var sharedPreferences: SharedPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -79,17 +81,13 @@ class MainActivity : AppCompatActivity() {
             ResourcesCompat.getDrawable(resources, R.drawable.map_marker_outline, theme)!!
         markerNormal.setTint(
             ResourcesCompat.getColor(
-                resources,
-                com.google.android.material.R.color.foreground_material_light,
-                theme
+                resources, com.google.android.material.R.color.foreground_material_light, theme
             )
         )
         markerDanger = ResourcesCompat.getDrawable(resources, R.drawable.map_marker_alert, theme)!!
         markerDanger.setTint(
             ResourcesCompat.getColor(
-                resources,
-                com.google.android.material.R.color.error_color_material_light,
-                theme
+                resources, com.google.android.material.R.color.error_color_material_light, theme
             )
         )
 
@@ -128,19 +126,27 @@ class MainActivity : AppCompatActivity() {
     private fun tisseoRouting(
         startPlace: String,
         endPlace: String,
+        date: LocalDateTime,
         wheelChair: Boolean,
         bus: Boolean,
         tram: Boolean,
         subway: Boolean,
         cableCar: Boolean,
         car: Boolean,
-        bike: Boolean,
-        date: LocalDateTime
+        bike: Boolean
     ) {
         val file = ArrayList<RoadNodeForRouting>()
 
-        val geoPointStart = addressToGeoPoint(startPlace)
-        val geoPointEnd = addressToGeoPoint(endPlace)
+        val geoPointStart = TisseoOsrmUtils.addressToGeoPoint(startPlace)
+        if (geoPointStart == null) {
+            Toast.makeText(this, "Start place not found", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val geoPointEnd = TisseoOsrmUtils.addressToGeoPoint(endPlace)
+        if (geoPointEnd == null) {
+            Toast.makeText(this, "End place not found", Toast.LENGTH_SHORT).show()
+            return
+        }
 
         val listDate = listOf(
             date,
@@ -166,8 +172,14 @@ class MainActivity : AppCompatActivity() {
 
             for (roadMode in roadModeList) {
                 osrmRouting(geoPointStart, geoPointEnd, roadMode, file)
-                for (transport in transports)
-                    aRouting(geoPointStart, geoPointEnd, roadMode, file, newDate, transport)
+                for (transport in transports) aRouting(
+                    geoPointStart,
+                    geoPointEnd,
+                    roadMode,
+                    file,
+                    newDate,
+                    transport
+                )
             }
 
             if (car) osrmRouting(geoPointStart, geoPointEnd, "car", file)
@@ -176,12 +188,8 @@ class MainActivity : AppCompatActivity() {
         drawJourney(selectBest(file).road)
     }
 
-    @OptIn(ExperimentalSerializationApi::class)
-    private fun addressToGeoPoint(place: String) = TisseoApiClient.places(place, "", "fr")!!
-        .placesList.place[0].let { GeoPoint(it.x, it.y) }
-
     private fun selectBest(file: List<RoadNodeForRouting>) =
-        file.minByOrNull(RoadNodeForRouting::cost)!!
+        file.minByOrNull(RoadNodeForRouting::cost) ?: throw NotFoundException("No road found")
 
 
     private fun aRouting(
@@ -199,73 +207,15 @@ class MainActivity : AppCompatActivity() {
             "4",
             date.format(tisseoDateFormatter),
             rollingStocks.joinToString(",")
-        )?.also {
-            it.routePlannerResult.journeys.forEach { j ->
-                val road = journeyToRoad(j.journey)
+        )?.apply {
+            routePlannerResult.journeys.forEach { j ->
+                val road = TisseoOsrmUtils.journeyToRoad(j.journey)
                 val price = price(road)
                 file.add(RoadNodeForRouting(road, price))
             }
         }
     }
 
-    private fun journeyToRoad(journey: JourneyResponse.RoutePlannerResult.JourneyItem.Journey): Road {
-        val road = Road()
-
-        journey.chunks.forEach { chunk ->
-
-            if (chunk.service != null) {
-                val wkt = chunk.service.wkt
-                val coordinates = wkt.substringAfter("(").substringBeforeLast(")").split(",")
-                val roadNode = RoadNode()
-                roadNode.mInstructions = chunk.service.text?.text
-                val (long, lat) = coordinates[0].trim().split(" ")
-                val units =
-                    chunk.service.duration.split(":".toRegex()).dropLastWhile { it.isEmpty() }
-                        .toTypedArray()
-                val duration =
-                    3600 * units[0].toInt() + 60 * units[1].toInt() + units[2].toInt()
-                roadNode.mDuration = duration.toDouble()
-                roadNode.mLocation = GeoPoint(lat.toDouble(), long.toDouble())
-                roadNode.mManeuverType = 1
-                road.mNodes.add(roadNode)
-                coordinates.forEach { coordinate ->
-                    val (longitude, latitude) = coordinate.trim().split(" ")
-                    road.mRouteHigh.add(GeoPoint(latitude.toDouble(), longitude.toDouble()))
-                }
-            } else if (chunk.street != null) {
-                val wkt = chunk.street.wkt
-                val roadNode = RoadNode()
-                roadNode.mInstructions = chunk.street.text.text
-                val units =
-                    chunk.street.duration.split(":".toRegex()).dropLastWhile { it.isEmpty() }
-                        .toTypedArray()
-                val duration =
-                    3600 * units[0].toInt() + 60 * units[1].toInt() + units[2].toInt()
-                roadNode.mDuration = duration.toDouble()
-                roadNode.mLength = chunk.street.length.toDouble() / 1000
-                roadNode.mLocation = GeoPoint(
-                    chunk.street.startAddress.connectionPlace.latitude.toDouble(),
-                    chunk.street.startAddress.connectionPlace.longitude.toDouble()
-                )
-                roadNode.mManeuverType = 1
-                road.mNodes.add(roadNode)
-                val intermediateCoordinates = wkt.substringAfter("(")
-                val coordinates: List<String> = if (intermediateCoordinates[0] == '(') {
-                    wkt.substringAfter("((").substringBeforeLast("))").split(",")
-                } else {
-                    wkt.substringAfter("(").substringBeforeLast(")").split(",")
-                }
-
-                coordinates.forEach { coordinate ->
-                    val (longitude, latitude) = coordinate.trim().split(" ")
-                    road.mRouteHigh.add(GeoPoint(latitude.toDouble(), longitude.toDouble()))
-
-                }
-            }
-        }
-
-        return road
-    }
 
     private fun osrmRouting(
         startPoint: GeoPoint,
@@ -300,22 +250,20 @@ class MainActivity : AppCompatActivity() {
         un impact faible
 
         nous avons donc décidé de la représenter par une fonction exponentielle sur chaque critère
-     */
-    /*
+     *//*
         On en profite aussi pour définir les points de sensibilité
      */
 
     private fun crowd(roadNode: RoadNode): Double {
         val out = exp(
-            if ((43.55 < roadNode.mLocation.latitude && roadNode.mLocation.latitude < 43.65) &&
-                (1.4 < roadNode.mLocation.longitude && roadNode.mLocation.longitude < 1.5)
-            ) {
-                (Math.random() * 2 + 1)* sharedPreferences.getInt("crowd",0)
+            if ((43.55 < roadNode.mLocation.latitude && roadNode.mLocation.latitude < 43.65) && (1.4 < roadNode.mLocation.longitude && roadNode.mLocation.longitude < 1.5)) {
+                (Math.random() * 2 + 1) * sharedPreferences.getInt("crowd", 0)
             } else {
                 Math.random()
-            })
+            }
+        )
 
-        if (out  > 10) {
+        if (out > 10) {
             roadNode.mManeuverType *= 2
         }
 
@@ -323,16 +271,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun light(roadNode: RoadNode): Double {
-        val out =exp(
-            if ((43.55 < roadNode.mLocation.latitude && roadNode.mLocation.latitude < 43.65) &&
-                (1.4 < roadNode.mLocation.longitude && roadNode.mLocation.longitude < 1.5)
-            ) {
-                (Math.random() * 2 + 1)* sharedPreferences.getInt("light",0)
+        val out = exp(
+            if ((43.55 < roadNode.mLocation.latitude && roadNode.mLocation.latitude < 43.65) && (1.4 < roadNode.mLocation.longitude && roadNode.mLocation.longitude < 1.5)) {
+                (Math.random() * 2 + 1) * sharedPreferences.getInt("light", 0)
             } else {
                 Math.random()
-            })
+            }
+        )
 
-        if (out  > 10) {
+        if (out > 10) {
             roadNode.mManeuverType *= 3
         }
 
@@ -340,14 +287,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun sound(roadNode: RoadNode): Double {
-        val out =exp(
-            if ((43.55 < roadNode.mLocation.latitude && roadNode.mLocation.latitude < 43.65) &&
-                (1.4 < roadNode.mLocation.longitude && roadNode.mLocation.longitude < 1.5)
-            ) {
-                (Math.random() * 2 + 1) * sharedPreferences.getInt("sound",0)
+        val out = exp(
+            if ((43.55 < roadNode.mLocation.latitude && roadNode.mLocation.latitude < 43.65) && (1.4 < roadNode.mLocation.longitude && roadNode.mLocation.longitude < 1.5)) {
+                (Math.random() * 2 + 1) * sharedPreferences.getInt("sound", 0)
             } else {
                 Math.random()
-            })
+            }
+        )
 
         if (out > 10) {
             roadNode.mManeuverType *= 5
@@ -408,40 +354,38 @@ class MainActivity : AppCompatActivity() {
     private var resultJourneyPlanner =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
-                result.data?.also {
-                    it.getStringExtra("Departure")?.also { departureAddress ->
-                        it.getStringExtra("Arrival")?.also { arrivalAddress ->
-                            it.getBooleanExtra("Bus", true).also { bus ->
-                                it.getBooleanExtra("Subway", true).also { subway ->
-                                    it.getBooleanExtra("CableCar", true).also { cableCar ->
-                                        it.getBooleanExtra("Tram", true).also { tram ->
-                                            it.getBooleanExtra("WheelChair", false)
-                                                .also { wheelChair ->
-                                                    it.getBooleanExtra("Car", false).also { car ->
-                                                        it.getBooleanExtra("Bike", false)
-                                                            .also { bike ->
-                                                                Thread {
-                                                                    tisseoRouting(
-                                                                        departureAddress,
-                                                                        arrivalAddress,
-                                                                        wheelChair,
-                                                                        bus,
-                                                                        tram,
-                                                                        subway,
-                                                                        cableCar,
-                                                                        car,
-                                                                        bike,
-                                                                        LocalDateTime.now()
-                                                                    )
-                                                                }.start()
-                                                            }
-                                                    }
-                                                }
-                                        }
-                                    }
+                val data = result.data
+                if (data == null) {
+                    Toast.makeText(this, "Data error", Toast.LENGTH_SHORT).show()
+                } else {
+                    val departureAddress = data.getStringExtra("Departure")
+                    if (departureAddress == null) {
+                        Toast.makeText(this, "Data error", Toast.LENGTH_SHORT).show()
+                    } else {
+                        val arrivalAddress = data.getStringExtra("Arrival")
+                        if (arrivalAddress == null) {
+                            Toast.makeText(this, "Data error", Toast.LENGTH_SHORT).show()
+                        } else {
+                            Thread {
+                                Looper.prepare()
+                                try {
+                                    tisseoRouting(
+                                        departureAddress,
+                                        arrivalAddress,
+                                        LocalDateTime.now(),
+                                        wheelChair = data.getBooleanExtra("WheelChair", false),
+                                        car = data.getBooleanExtra("Car", false),
+                                        bike = data.getBooleanExtra("Bike", false),
+                                        bus = data.getBooleanExtra("Bus", true),
+                                        tram = data.getBooleanExtra("Tram", true),
+                                        subway = data.getBooleanExtra("Subway", true),
+                                        cableCar = data.getBooleanExtra("CableCar", true),
+                                    )
+                                } catch (e: NotFoundException) {
+                                    Log.wtf("MainActivity", e.message, e)
+                                    Toast.makeText(this, "No road found", Toast.LENGTH_SHORT).show()
                                 }
-
-                            }
+                            }.start()
                         }
                     }
                 }
