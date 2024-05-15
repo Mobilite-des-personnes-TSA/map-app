@@ -20,4 +20,12 @@
     <string name="wheel_chair">Accesible en chaise roulante</string>
     <string name="arival_hint">Indiquer le nom du lieux d\'arrivée.</string>
     <string name="departure_hint">Indiquer le nom du lieux de départ.</string>
+    <string name="summary_sensibility_light">A quelle point je me sens pas à l\'aise quand il y\'a de la lumière</string>
+    <string name="title_sensibility_light">Sensibilité à la lumière</string>
+    <string name="title_sensibility_crowd">Sensibilité à la foule</string>
+    <string name="summary_sensibility_crowd">A quelle point je me sens pas à l\'aise quand il y\'a du monde</string>
+    <string name="title_sensibility_noise">Sensibilité au bruit</string>
+    <string name="summary_sensibility_noise">A quelle point je me sens pas à l\'aise quand il y\'a du bruit</string>
+    <string name="summary_sensibility_global">Les éléments de la ville que je veux éviter.</string>
+    <string name="title_sensibility_global">Sensibilité</string>
 </resources>

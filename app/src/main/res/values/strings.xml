@@ -27,6 +27,14 @@
     <string name="bus">Bus</string>
     <string name="cable_car">Cable car</string>
     <string name="wheel_chair">Wheel chair accessible</string>
-    <string name="arival_hint">FLEME TODO plz je parle pas anglais</string>
-    <string name="departure_hint">FLEME TODO plz je parle pas anglais</string>
+    <string name="arival_hint">Indicate the name of the destination.</string>
+    <string name="departure_hint">Indicate the name of the place of departure.</string>
+    <string name="summary_sensibility_light">How uncomfortable I feel when there\'s light</string>
+    <string name="title_sensibility_light">Light sensitivity</string>
+    <string name="title_sensibility_crowd">Crowd sensitivity</string>
+    <string name="summary_sensibility_crowd">How uncomfortable I feel when there\'s crowd</string>
+    <string name="title_sensibility_noise">Noise sensitivity</string>
+    <string name="summary_sensibility_global">The parts of the city I want to avoid.</string>
+    <string name="title_sensibility_global">Sensibility</string>
+    <string name="summary_sensibility_noise">How uncomfortable I feel when there\'s noise</string>
 </resources>
