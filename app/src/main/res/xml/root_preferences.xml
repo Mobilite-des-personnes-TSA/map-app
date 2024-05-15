@@ -10,6 +10,7 @@
             android:defaultValue="0"
             android:max="5"
             app:key="noise"
+            app:icon="@drawable/rounded_brand_awareness_24"
             app:showSeekBarValue="true"
             app:summary="@string/summary_sensibility_noise"
             app:title="@string/title_sensibility_noise" />
@@ -19,8 +20,8 @@
             android:defaultValue="0"
             android:max="5"
             app:key="crowd"
+            app:icon="@drawable/rounded_groups_24"
             app:showSeekBarValue="true"
-            app:singleLineTitle="false"
             app:summary="@string/summary_sensibility_crowd"
             app:title="@string/title_sensibility_crowd" />
 
@@ -28,6 +29,7 @@
             android:defaultValue="0"
             android:max="5"
             app:key="light"
+            app:icon="@drawable/rounded_light_mode_24"
             app:showSeekBarValue="true"
             app:summary="@string/summary_sensibility_light"
             app:title="@string/title_sensibility_light" />
