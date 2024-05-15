@@ -24,4 +24,8 @@
     <string name="attachment_summary_off">Only download attachments when manually requested</string>
     <string name="title_activity_choix_dest">ChoixDest</string>
     <string name="button">Button</string>
+    <string name="title_activity_routing">Routing</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
 </resources>

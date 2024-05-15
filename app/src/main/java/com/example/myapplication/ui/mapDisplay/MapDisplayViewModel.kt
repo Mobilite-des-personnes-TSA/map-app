@@ -1,10 +1,10 @@
+package com.example.myapplication.ui.mapDisplay
+
 import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import org.osmdroid.util.GeoPoint
-
 import com.example.myapplication.tisseo.TisseoApiClient
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.launch
@@ -13,8 +13,8 @@ import org.osmdroid.bonuspack.routing.OSRMRoadManager
 import org.osmdroid.bonuspack.routing.Road
 import org.osmdroid.bonuspack.routing.RoadManager
 import org.osmdroid.bonuspack.routing.RoadNode
-import org.osmdroid.views.overlay.Marker
-import org.osmdroid.views.overlay.Polyline
+import org.osmdroid.util.GeoPoint
+
 
 /** TODO:
  *  Create a flow to pass Data to MapDisplay
@@ -38,7 +38,35 @@ data class NodeUIState(
     val noiseCoefficient: Double
 )
 
+/*
+// TODO: Possible data Structure
+//      See what else is necessary
+//  Area system, all the nodes in that area have a high coefficient
+//  How do we fetch our accommodation Data ?
+data class Road(
+    val id: String,
+    val name: String,
+    val nodes: List<Node>
+)
+
+data class Node(
+    val id: String,
+    val latitude: Double,
+    val longitude: Double,
+    val noiseCoefficient: Double
+)
+ */
+
 class MapDisplayViewModel : ViewModel() {
+
+    private val _text = MutableLiveData<String>().apply {
+        value = "This is notifications Fragment"
+    }
+    val text: LiveData<String> = _text
+
+
+    /////////// IS FOR ME
+
 
     // Update the user position, send it asLiveData()
     private val _userPosition = MutableLiveData<GeoPoint>()
@@ -66,17 +94,17 @@ class MapDisplayViewModel : ViewModel() {
     }
 
     //Instantiate Repository to link to Tisséo API
-        //private val repository =
+    //private val repository =
 
     // LiveData or StateFlow to hold data
-        //val data = repository.getData()
+    //val data = repository.getData()
 
     // Function to fetch data from repository
-        /** fun fetchData() {
-                viewModelScope.launch {
-                    repository.fetchData()
-                }
-            }*/
+    /** fun fetchData() {
+    viewModelScope.launch {
+    repository.fetchData()
+    }
+    }*/
 
 
     /** Draw a Map using the tisseoApi
@@ -149,7 +177,7 @@ class MapDisplayViewModel : ViewModel() {
     /** Function to Draw a route independent of public transportation
      *  TODO : Why use separate functions ?
      */
-    fun osrmRouting(startPoint:GeoPoint,endPoint: GeoPoint,mode:String, dispatcher : CoroutineDispatcher){
+    fun osrmRouting(startPoint: GeoPoint, endPoint: GeoPoint, mode:String, dispatcher : CoroutineDispatcher){
 
         viewModelScope.launch {
             val roadManager: RoadManager = OSRMRoadManager(this, "User")
@@ -185,8 +213,5 @@ class MapDisplayViewModel : ViewModel() {
             }
         }
     }
-
-
-
 
 }

@@ -1,10 +1,25 @@
-package com.example.myapplication
+package com.example.myapplication.ui.mapDisplay
 
-import MapDisplayViewModel
-import RoadUIState
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.Button
+import android.widget.TextView
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import androidx.preference.PreferenceManager
+import com.example.myapplication.R
+import com.example.myapplication.databinding.FragmentMapDisplayBinding
+import org.osmdroid.bonuspack.routing.Road
+import org.osmdroid.config.Configuration
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.MapView
+
+import RoadUIState
+import android.annotation.SuppressLint
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -22,12 +37,20 @@ import org.osmdroid.bonuspack.routing.RoadManager
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
 
+class MapDisplayFragment : Fragment() {
 
-class MapDisplay : AppCompatActivity() {
+    private var _binding: FragmentMapDisplayBinding? = null
+
+    // This property is only valid between onCreateView and
+    // onDestroyView.
+    private val binding get() = _binding!!
+
+    //// IS FOR ME
+
     private val requestPermissionRequestCode = 1
     private lateinit var map: MapView
     private lateinit var button: Button
-    private lateinit var viewModel : MapDisplayViewModel
+    private lateinit var mapDisplayViewModel : MapDisplayViewModel
 
     /** TODO : Add a button to recenter the map around the user
      *  Set a boolean, active and deactivate the button ?
@@ -36,21 +59,56 @@ class MapDisplay : AppCompatActivity() {
      */
     private lateinit var centerButton: Button
 
-    @SuppressLint("UseCompatLoadingForDrawables")
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        // How will we be loading the settings ?
-        getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this))
-        setContentView(R.layout.activity_main)
+
+    //val action = MapDisplayFragmentDirections.actionMapDisplayFragmentToJourneyPlannerFragment()
+    //findNavController().navigate(action)
+    //TODO: For naviguation
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+
+        // Obtain an instance of the MapDisplayViewModel
+        val mapDisplayViewModel =
+            ViewModelProvider(this).get(MapDisplayViewModel::class.java)
+
+        _binding = FragmentMapDisplayBinding.inflate(inflater, container, false)
+        // TODO : should i attach it to parent
+        val root: View = binding.root
+
+        val textView: TextView = binding.textNotifications
+        mapDisplayViewModel.text.observe(viewLifecycleOwner) {
+            textView.text = it
+        }
+
+        ////// IS FOR ME
+
+        Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this))
+
 
         // Initializing map components
+        // TODO: No need to bind stuff
+        // TODO: Make sure the UI starts where the user is
+        // use binding.<id>
         map = findViewById(R.id.map)
         map.setTileSource(TileSourceFactory.MAPNIK)
         val mapController = map.controller
         mapController.setZoom(13.0)
 
-        // Obtain an instance of the MapDisplayViewModel
-        viewModel = ViewModelProvider(this).get(MapDisplayViewModel::class.java)
+        return root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        // TODO Example: Set text of a TextView
+        binding.textViewTitle.text = "Map Display Fragment"
+
+        // TODO Example: Set click listener for a button
+        binding.button.setOnClickListener {
+            // Handle button click here
+        }
 
         // Observe were the user is located
         viewModel.userPosition.observe(this, Observer { userPosition ->
@@ -73,47 +131,7 @@ class MapDisplay : AppCompatActivity() {
             val intent = Intent(this, JourneyPlanner::class.java)
             startActivity(intent)
         }
-    }
 
-    override fun onResume() {
-        super.onResume()
-        //this will refresh the osmdroid configuration on resuming.
-        //if you make changes to the configuration, use
-        //SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        //Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this));
-        map.onResume() //needed for compass, my location overlays, v6.0.0 and up
-    }
-
-    override fun onPause() {
-        super.onPause()
-        //this will refresh the osmdroid configuration on resuming.
-        //if you make changes to the configuration, use
-        //SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        //Configuration.getInstance().save(this, prefs);
-        map.onPause()  //needed for compass, my location overlays, v6.0.0 and up
-    }
-
-    //  What permission are we asking for again ?
-    //  If not inherently necessary might be better not to ask it systematically
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        val permissionsToRequest = ArrayList<String>()
-        var i = 0
-        while (i < grantResults.size) {
-            permissionsToRequest.add(permissions[i])
-            i++
-        }
-        if (permissionsToRequest.size > 0) {
-            ActivityCompat.requestPermissions(
-                this,
-                permissionsToRequest.toTypedArray(),
-                requestPermissionRequestCode
-            )
-        }
     }
 
     /**
@@ -138,5 +156,11 @@ class MapDisplay : AppCompatActivity() {
             nodeMarker.subDescription = Road.getLengthDurationText(this,node.mLength,node.mDuration)
             map.overlays.add(nodeMarker)
         }
+    }
+
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

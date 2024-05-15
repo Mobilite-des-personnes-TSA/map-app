@@ -10,6 +10,7 @@ import com.example.myapplication.BuildConfig
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
+import org.osmdroid.library.BuildConfig
 import java.io.BufferedInputStream
 import java.io.IOException
 import java.net.URL
@@ -34,7 +35,7 @@ data class Node(
 
 object TisseoApiClient {
 
-    var API_KEY = "blabla API KEY"
+    var API_KEY = "e9a7d698-8e62-4400-b0e3-8167d2971b57"
 
     private val apiEntryUri =
         Uri.Builder().scheme("https").authority("api.tisseo.fr").appendPath("v2")

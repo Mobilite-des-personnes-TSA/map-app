@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/jpFragment"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/primary_color"
+    tools:context=".ui.journeyPlanner.JourneyPlannerFragment">
+
+
+    <!-- The big thing that holds JourneyPlanner-->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/jp_header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_begin="161dp" />
+
+    <!-- The big thing that says JourneyPlanner-->
+    <TextView
+        android:id="@+id/jp_header_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:fontFamily="sans-serif-medium"
+        android:text="Journey planner"
+        android:textColor="@color/white"
+        android:textSize="34sp"
+        app:layout_constraintTop_toBottomOf="@+id/backButton"
+        tools:ignore="MissingConstraints"
+        tools:layout_editor_absoluteX="81dp" />
+
+    <!-- The big thing that allows to go back-->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/backButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="344dp"
+        android:background="@color/white"
+        android:clickable="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/baseline_arrow_back_ios_new_24"
+        app:tint="#3B91B8" />
+
+
+    <androidx.cardview.widget.CardView
+
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/jp_header">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <!-- Departure and arrival-->
+            <LinearLayout
+
+                android:id="@+id/departure_arrival"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="380dp"
+                android:background="@color/white"
+                android:orientation="vertical"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <TextView
+                    android:id="@+id/departurePrompt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:padding="16dp"
+                    android:text="Departure"
+                    android:textSize="20sp" />
+
+                <EditText
+                    android:id="@+id/departureRequest"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="15dp"
+                    android:ems="10"
+                    android:hint="type an address"
+                    android:inputType="text" />
+
+                <TextView
+                    android:id="@+id/arrivalPrompt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="16dp"
+                    android:text="Arrival"
+                    android:textSize="20sp" />
+
+                <EditText
+                    android:id="@+id/arrivalRequest"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="15dp"
+                    android:ems="10"
+                    android:hint="type an address"
+                    android:inputType="text" />
+            </LinearLayout>
+
+
+            <!-- Time constraints -->
+            <RelativeLayout
+                android:id="@+id/time_constraints"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_margin="10sp"
+
+                app:layout_constraintTop_toBottomOf="@+id/departure_arrival">
+
+                <Button
+                    android:id="@+id/leave_at"
+                    android:layout_width="195dp"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="@color/secondary_color"
+                    android:text="Leave at"
+                    android:layout_marginLeft="5dp"
+                    tools:ignore="HardcodedText" />
+
+                <Button
+                    android:id="@+id/arrive_by"
+                    android:layout_width="197dp"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="@color/secondary_color"
+                    android:text="Arrive by"
+                    android:layout_marginLeft="5dp"
+                    android:layout_centerHorizontal="true"
+                    android:layout_toRightOf="@id/leave_at"
+                    tools:ignore="HardcodedText" />
+
+                <Button
+                    android:id="@+id/date"
+                    android:layout_width="300dp"
+                    android:layout_height="45dp"
+                    android:backgroundTint="@color/primary_color"
+                    android:text="Date"
+                    android:layout_below="@id/arrive_by"
+                    android:layout_centerHorizontal="true"
+                    tools:ignore="HardcodedText" />
+
+            </RelativeLayout>
+
+
+            <!-- transport means -->
+            <RelativeLayout
+                android:id="@+id/transport_means"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintTop_toBottomOf="@id/time_constraints">
+
+                <TextView
+                    android:id="@+id/display_means_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Selected mode"
+                    android:textSize="20sp"
+                    android:translationX="20dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="20dp"
+                    tools:ignore="HardcodedText"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerHorizontal="true"
+                    />
+
+                <Switch
+                    android:id="@+id/bikeSwitch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Personal bicycle"
+                    android:textSize="14sp"
+                    android:translationX="20dp"
+                    android:layout_below="@+id/display_means_title"
+                    />
+
+                <Switch
+                    android:id="@+id/velibSwitch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Velib"
+                    android:textSize="14sp"
+                    android:translationX="20dp"
+                    android:layout_below="@+id/bikeSwitch"
+                    />
+
+                <Switch
+                    android:id="@+id/publicTransportationSwitch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Public transportation"
+                    android:textSize="14sp"
+                    android:translationX="20dp"
+                    android:layout_below="@+id/velibSwitch"
+                    />
+
+                <Switch
+                    android:id="@+id/walkingSwitch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Just walking"
+                    android:translationX="20dp"
+                    android:layout_below="@+id/publicTransportationSwitch"
+                    />
+            </RelativeLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,6 +1,10 @@
-package com.example.myapplication.journeyPlanner
+package com.example.myapplication.ui.journeyPlanner
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import com.example.myapplication.MapDisplay
+import com.example.myapplication.journeyPlanner.JourneyPlanner
 import com.example.myapplication.tisseo.JourneyResponse
 import com.example.myapplication.tisseo.TisseoApiClient
 import kotlinx.coroutines.CoroutineDispatcher
@@ -9,9 +13,12 @@ import org.osmdroid.bonuspack.routing.Road
 import org.osmdroid.bonuspack.routing.RoadNode
 import org.osmdroid.util.GeoPoint
 
+class JourneyPlannerViewModel : ViewModel() {
 
-// TODO : Done
-class JourneyPlannerViewModel {
+    private val _text = MutableLiveData<String>().apply {
+        value = "This is dashboard Fragment"
+    }
+    val text: LiveData<String> = _text
 
     /** Complete Searches
      * URL : https://api.tisseo.fr/v2/places.<format>?...paramètres...
