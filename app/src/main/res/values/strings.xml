@@ -27,6 +27,6 @@
     <string name="bus">Bus</string>
     <string name="cable_car">Cable car</string>
     <string name="wheel_chair">Wheel chair accessible</string>
-    <string name="arival_hint">FLEME TODO plz je parle pas anglais</string>
-    <string name="departure_hint">FLEME TODO plz je parle pas anglais</string>
+    <string name="arival_hint">Arrival indication</string>
+    <string name="departure_hint">Departure indication</string>
 </resources>
