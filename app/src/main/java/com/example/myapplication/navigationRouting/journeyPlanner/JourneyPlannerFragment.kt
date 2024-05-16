@@ -69,8 +69,7 @@ class JourneyPlannerFragment : Fragment() {
         // Navigate to map when Search button is clicked
         //TODO: Keep the JourneySearch info as long as the user hasn't closed the app
         binding.search.setOnClickListener {
-            lifecycleScope.launch {
-                journeyPlannerViewModel.routing(
+                /*journeyPlannerViewModel.routing(
                     binding.departurePlace.toString(),
                     binding.arrivalPlace.toString(),
                     binding.wheelChair.isChecked,
@@ -87,23 +86,28 @@ class JourneyPlannerFragment : Fragment() {
                 data?.let {
                     val action = JourneyPlannerFragmentDirections.actionJourneyPlannerToMapDisplay(
                         it.road
-                    )
+                    )*/
+
+            val action = JourneyPlannerFragmentDirections.actionJourneyPlannerToMapDisplay()
                     findNavController().navigate(action)
-                }
-            }
+
         }
         return root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val journeyPlannerViewModel =
+            ViewModelProvider(this).get(JourneyPlannerViewModel::class.java)
 
         // Observe navigation events
-        findNavController()
+        /*findNavController()
             .currentBackStackEntry?.savedStateHandle?.getLiveData<String>("key")?.observe(viewLifecycleOwner) { result ->
             // TODO: Handle navigation event
             // Is it setup correctly ?
         }
+
+         */
     }
 
     override fun onDestroyView() {

@@ -160,7 +160,7 @@ class JourneyPlannerViewModel : ViewModel() {
      *  Tries multiple routes and selects the best, update UIRoadState
      *
      */
-    suspend fun routing (
+    fun routing (
         startPlace: String,
         endPlace: String,
         wheelChair: Boolean,

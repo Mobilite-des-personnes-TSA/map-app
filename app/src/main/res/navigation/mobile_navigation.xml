@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/navigation_home">
+    app:startDestination="@id/navigation_journey_planner">
 
     <fragment
         android:id="@+id/navigation_home"
@@ -32,9 +32,7 @@
         tools:layout="@layout/fragment_map_display" >
         <action
             android:id="@+id/action_map_display_to_journey_planner"
-            app:destination="@id/navigation_journey_planner" />
-        <argument
-            android:name="roadToDraw"
-            app:argType="org.osmdroid.bonuspack.routing.Road" />
+            app:destination="@id/navigation_journey_planner">
+        </action>
     </fragment>
 </navigation>

@@ -33,8 +33,5 @@
             android:name=".SettingsActivity"
             android:exported="false"
             android:label="@string/title_activity_setting" />
-
     </application>
-
-
 </manifest>

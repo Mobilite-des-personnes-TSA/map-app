@@ -22,6 +22,9 @@ import android.annotation.SuppressLint
 import android.content.SharedPreferences
 import android.graphics.drawable.Drawable
 import android.util.Log
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -36,7 +39,7 @@ import java.time.format.DateTimeFormatter
 
 class MapDisplayFragment : Fragment() {
 
-    val args : MapDisplayFragmentArgs by navArgs()
+    //val args : MapDisplayFragmentArgs by navArgs()
 
     // TODO : These two buttons
     private lateinit var buttonJourneyPlanner: Button
@@ -47,6 +50,7 @@ class MapDisplayFragment : Fragment() {
     private lateinit var button: Button
     private lateinit var mapDisplayViewModel : MapDisplayViewModel
     private val requestPermissionRequestCode = 1
+    private lateinit var map: MapView
 
     private var _binding: FragmentMapDisplayBinding? = null
     private val binding get() = _binding!!
@@ -56,9 +60,10 @@ class MapDisplayFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        view?.let { super.onViewCreated(it, savedInstanceState) }
 
         // Obtain an instance of the MapDisplayViewModel
-        val mapDisplayViewModel = ViewModelProvider(this)[MapDisplayViewModel::class.java]
+        val mapDisplayViewModel = ViewModelProvider(this).get(MapDisplayViewModel::class.java)
 
         _binding = FragmentMapDisplayBinding.inflate(inflater, container, false)
         val root: View = binding.root
@@ -67,25 +72,37 @@ class MapDisplayFragment : Fragment() {
         Configuration.getInstance().load(this.context,
             this.context?.let { PreferenceManager.getDefaultSharedPreferences(it) })
 
+        map = binding.map
         // Initializing map components
-        binding.map.setTileSource(TileSourceFactory.MAPNIK)
-        binding.map.controller.setZoom(13.0)
+        map.setTileSource(TileSourceFactory.MAPNIK)
+        map.controller.setZoom(13.0)
+
+        val startCenterPoint = GeoPoint(43.6, 1.4333)
+        map.controller.setCenter(startCenterPoint)
 
         // Draw the map when recieved
+        /*
         CoroutineScope(Dispatchers.IO).launch {
-            mapDisplayViewModel.drawJourney(args.roadToDraw, binding.map, markerNormal, markerDanger)
+            mapDisplayViewModel.drawJourney(args.mapToDraw, binding.map, markerNormal, markerDanger)
         }
+         */
+
         return root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        val mapDisplayViewModel = ViewModelProvider(this).get(MapDisplayViewModel::class.java)
         // Observe were the user is located
+        /*
         mapDisplayViewModel.userPosition.observe(viewLifecycleOwner, Observer { userPosition ->
+
             binding.map.controller.setCenter(GeoPoint(userPosition))
             // Make sure the UI starts where the user is
         })
+        */
+
+        button = binding.buttonJourneyPlanner
 
         //TODO: Button to go back
         button.setOnClickListener {
