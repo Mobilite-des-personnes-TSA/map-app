@@ -7,11 +7,9 @@ import android.window.OnBackInvokedDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import com.example.myapplication.BuildConfig
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
-import org.osmdroid.library.BuildConfig
 import java.io.BufferedInputStream
 import java.io.IOException
 import java.net.URL

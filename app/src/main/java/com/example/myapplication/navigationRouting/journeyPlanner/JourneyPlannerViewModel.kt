@@ -42,10 +42,6 @@ class JourneyPlannerViewModel : ViewModel() {
     private val tisseoDateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
     private lateinit var sharedPreferences : SharedPreferences
 
-    private val _text = MutableLiveData<String>().apply {
-        value = "This is Journey Planner Fragment"
-    }
-
     private val _roadState = MutableLiveData<RoadState>()
     val roadState: LiveData<RoadState> = _roadState
 
@@ -164,7 +160,7 @@ class JourneyPlannerViewModel : ViewModel() {
      *  Tries multiple routes and selects the best, update UIRoadState
      *
      */
-    private suspend fun routing (
+    suspend fun routing (
         startPlace: String,
         endPlace: String,
         wheelChair: Boolean,
@@ -175,7 +171,6 @@ class JourneyPlannerViewModel : ViewModel() {
         car: Boolean,
         bike: Boolean,
         date: LocalDateTime,
-        standardMode:String,
         dispatcher: CoroutineDispatcher
     ){
         val roads = ArrayList<RoadState>()
@@ -201,8 +196,6 @@ class JourneyPlannerViewModel : ViewModel() {
             if (subway) transportsList.add(listOf(METRO))
             if (cableCar) transportsList.add(listOf(CABLE_CAR))
             transportsList.add(transportsList.flatten())
-
-            val map = MapDisplayFragment();
 
             for (newDate in listDate) {
 

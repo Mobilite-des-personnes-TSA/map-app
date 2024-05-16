@@ -44,12 +44,12 @@ class MapDisplayFragment : Fragment() {
 
     private lateinit var markerNormal: Drawable
     private lateinit var markerDanger: Drawable
+    private lateinit var button: Button
+    private lateinit var mapDisplayViewModel : MapDisplayViewModel
+    private val requestPermissionRequestCode = 1
 
     private var _binding: FragmentMapDisplayBinding? = null
     private val binding get() = _binding!!
-    private val requestPermissionRequestCode = 1
-    private lateinit var button: Button
-    private lateinit var mapDisplayViewModel : MapDisplayViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -71,7 +71,7 @@ class MapDisplayFragment : Fragment() {
         binding.map.setTileSource(TileSourceFactory.MAPNIK)
         binding.map.controller.setZoom(13.0)
 
-        // Set
+        // Draw the map when recieved
         CoroutineScope(Dispatchers.IO).launch {
             mapDisplayViewModel.drawJourney(args.roadToDraw, binding.map, markerNormal, markerDanger)
         }

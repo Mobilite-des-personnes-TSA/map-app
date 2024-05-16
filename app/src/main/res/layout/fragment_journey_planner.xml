@@ -187,9 +187,8 @@
         app:icon="@drawable/checkbox_marked_circle_outline"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:onClick="@{() -> navigateToMap()}"
+        android:onClick="@{() -> navigateToMap()}"/>
         <!-- TODO: Is this a thing -->
-        />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -25,22 +25,9 @@
             android:theme="@style/Theme.Material3.Light.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <fragment
-            android:name=".MapDisplayFragment"
-            android:exported="true"
-            android:theme="@style/Theme.Material3.Light.NoActionBar"
-            />
-
-        <fragment
-            android:name=".JourneyPlannerFragment"
-            android:exported="false"
-            android:label="@string/title_fragment_journey"
-            />
 
         <activity
             android:name=".SettingsActivity"

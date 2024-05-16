@@ -64,8 +64,6 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.constraintlayout)
-    implementation(libs.androidx.navigation.fragment.ktx)
-    implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.androidx.preference)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.lifecycle.livedata.ktx)

@@ -30,4 +30,35 @@
         app:layout_constraintTop_toTopOf="parent"
         app:navGraph="@navigation/mobile_navigation" />
 
+
+    <fragment
+        android:id="@+id/mapDisplayFragment"
+        android:name="com.example.myapplication.navigationRouting.mapDisplay.MapDisplayFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:exported="false"
+        android:theme="@style/Theme.Material3.Light.NoActionBar"
+        android:label="@string/title_fragment_map_display"
+        />
+
+    <fragment
+        android:id="@+id/JourneyPlannerFragment"
+        android:name="com.example.myapplication.navigationRouting.journeyPlanner.JourneyPlannerFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:theme="@style/Theme.Material3.Light.NoActionBar"
+        android:exported="false"
+        android:label="@string/title_fragment_journey_planner"
+        />
+
+    <fragment
+        android:id="@+id/HomeFragment"
+        android:name="com.example.myapplication.navigationRouting.home.HomeFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:theme="@style/Theme.Material3.Light.NoActionBar"
+        android:exported="false"
+        android:label="@string/title_fragment_home"
+        />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
