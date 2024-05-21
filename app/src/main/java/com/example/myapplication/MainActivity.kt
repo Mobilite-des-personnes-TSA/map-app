@@ -238,8 +238,12 @@ class MainActivity : AppCompatActivity() {
         file.add(RoadNodeForRouting(road, price))
     }
 
-    private fun price(road: Road) = road.mNodes.sumOf {
-        (crowd(it) + light(it) + sound(it)) * it.mLength
+    private fun price(road: Road) : Double{
+        val out =normalise()
+
+        return road.mNodes.sumOf {
+            (exp(crowd(it)/out) + exp(light(it)/out) + exp(sound(it)/out) + 1/out) * it.mLength
+        }
     }
 
     /*
@@ -255,15 +259,15 @@ class MainActivity : AppCompatActivity() {
      */
 
     private fun crowd(roadNode: RoadNode): Double {
-        val out = exp(
-            if ((43.55 < roadNode.mLocation.latitude && roadNode.mLocation.latitude < 43.65) && (1.4 < roadNode.mLocation.longitude && roadNode.mLocation.longitude < 1.5)) {
-                (Math.random() * 2 + 1) * sharedPreferences.getInt("crowd", 0)
+        val out =
+            (if ((43.55 < roadNode.mLocation.latitude && roadNode.mLocation.latitude < 43.65) && (1.4 < roadNode.mLocation.longitude && roadNode.mLocation.longitude < 1.5)) {
+                (Math.random() * 2 + 1)
             } else {
                 Math.random()
             }
-        )
+                    * sharedPreferences.getInt("rowd", 0))
 
-        if (out > 10) {
+        if (out > 2) {
             roadNode.mManeuverType *= 2
         }
 
@@ -271,15 +275,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun light(roadNode: RoadNode): Double {
-        val out = exp(
-            if ((43.55 < roadNode.mLocation.latitude && roadNode.mLocation.latitude < 43.65) && (1.4 < roadNode.mLocation.longitude && roadNode.mLocation.longitude < 1.5)) {
-                (Math.random() * 2 + 1) * sharedPreferences.getInt("light", 0)
+        val out =
+            (if ((43.55 < roadNode.mLocation.latitude && roadNode.mLocation.latitude < 43.65) && (1.4 < roadNode.mLocation.longitude && roadNode.mLocation.longitude < 1.5)) {
+                (Math.random() * 2 + 1)
             } else {
                 Math.random()
             }
-        )
+                    * sharedPreferences.getInt("light", 0))
 
-        if (out > 10) {
+        if (out > 2) {
             roadNode.mManeuverType *= 3
         }
 
@@ -287,20 +291,30 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun sound(roadNode: RoadNode): Double {
-        val out = exp(
-            if ((43.55 < roadNode.mLocation.latitude && roadNode.mLocation.latitude < 43.65) && (1.4 < roadNode.mLocation.longitude && roadNode.mLocation.longitude < 1.5)) {
-                (Math.random() * 2 + 1) * sharedPreferences.getInt("sound", 0)
+        val out =
+            (if ((43.55 < roadNode.mLocation.latitude && roadNode.mLocation.latitude < 43.65) && (1.4 < roadNode.mLocation.longitude && roadNode.mLocation.longitude < 1.5)) {
+                (Math.random() * 2 + 1)
             } else {
                 Math.random()
             }
-        )
+                    * sharedPreferences.getInt("sound", 0))
 
-        if (out > 10) {
+
+        if (out > 2) {
             roadNode.mManeuverType *= 5
         }
         return out
     }
 
+    private fun normalise (): Int {
+        var some = 1
+
+        for (share in sharedPreferences.all.keys){
+            some += sharedPreferences.getInt(share, 0)
+        }
+
+        return some
+    }
 
     private fun drawJourney(road: Road) {
         val roadOverlay: Polyline = RoadManager.buildRoadOverlay(road)

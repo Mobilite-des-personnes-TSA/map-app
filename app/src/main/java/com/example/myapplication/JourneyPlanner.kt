@@ -1,5 +1,6 @@
 package com.example.myapplication
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
@@ -21,6 +22,7 @@ class JourneyPlanner : AppCompatActivity() {
 
     private lateinit var editTextDep: TextInputLayout
     private lateinit var editTextArv: TextInputLayout
+    @SuppressLint( "ResourceType")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_journey_planner)
@@ -31,6 +33,9 @@ class JourneyPlanner : AppCompatActivity() {
                 .commit()
         }
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setHomeButtonEnabled(true)
+        supportActionBar?.setHomeActionContentDescription(1)
+
 
         editTextDep = findViewById(R.id.departure_place)
         editTextArv = findViewById(R.id.arrival_place)
