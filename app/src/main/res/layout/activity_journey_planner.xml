@@ -1,205 +1,192 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#3B91B8">
+    <ScrollView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guideline"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintGuide_percent=".22" />
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/backButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:layout_marginTop="20dp"
-            android:layout_marginEnd="344dp"
-            android:background="@color/white"
-            android:clickable="true"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/baseline_arrow_back_ios_new_24"
-            app:tint="#3B91B8" />
-
-        <TextView
-            android:id="@+id/journeyPlanner"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:fontFamily="sans-serif-medium"
-            android:text="Journey planner"
-            android:textColor="@color/white"
-            android:textSize="34sp"
-            app:layout_constraintTop_toBottomOf="@+id/backButton"
-            tools:layout_editor_absoluteX="81dp"
-            tools:ignore="MissingConstraints" />
-
-        <androidx.cardview.widget.CardView
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/guideline">
+            android:layout_height="wrap_content">
 
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/departure_place"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="10dp"
+                android:hint="@string/departure_place"
+                app:helperText="@string/departure_hint"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:startIconDrawable="@drawable/location_exit">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/arrival_place"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="10dp"
+                android:ems="10"
+                android:hint="@string/arrival_place"
+                android:inputType="text"
+                app:helperText="@string/arival_hint"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/departure_place"
+                app:startIconDrawable="@drawable/location_enter">
 
-                <LinearLayout
+                <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginBottom="400dp"
-                    android:orientation="vertical"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintTop_toTopOf="parent">
-
-                    <TextView
-                        android:id="@+id/textView2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:text="Departure"
-                        android:textSize="20sp" />
-
-                    <EditText
-                        android:id="@+id/editTextText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:ems="10"
-                        android:inputType="text"
-                        android:text="type an adress" />
-
-                    <TextView
-                        android:id="@+id/textView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Arrival"
-                        android:textSize="20sp" />
-
-                    <EditText
-                        android:id="@+id/editTextText2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:ems="10"
-                        android:inputType="text"
-                        android:text="type an adress" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/linearLayout"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginTop="170dp"
-                    android:layout_marginBottom="300dp"
-                    android:orientation="vertical"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintTop_toTopOf="parent">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="horizontal">
+                    android:layout_height="wrap_content" />
+            </com.google.android.material.textfield.TextInputLayout>
+            <!-- TODO Time and date picker
+                        <Button
+                            android:id="@+id/leave_at"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp"
+                            android:layout_marginTop="10dp"
+                            android:layout_marginEnd="10dp"
+                            android:text="@string/leave_at"
+                            app:layout_constraintEnd_toStartOf="@id/arrive_by"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@+id/arrival_place" />
 
                         <Button
-                            android:id="@+id/leaveat"
-                            android:layout_width="195dp"
+                            android:id="@+id/arrive_by"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:backgroundTint="@color/main_color"
-                            android:text="Leave at" />
+                            android:layout_marginStart="10dp"
+                            android:layout_marginEnd="10dp"
+                            android:text="@string/arrive_by"
+                            app:layout_constraintBottom_toBottomOf="@+id/leave_at"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toEndOf="@+id/leave_at"
+                            app:layout_constraintTop_toTopOf="@+id/leave_at" />
 
                         <Button
-                            android:id="@+id/arriveby"
-                            android:layout_width="197dp"
+                            android:id="@+id/date"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:backgroundTint="@color/main_color"
-                            android:text="Arrive by" />
-                    </LinearLayout>
+                            android:layout_marginStart="10dp"
+                            android:layout_marginTop="10dp"
+                            android:layout_marginEnd="10dp"
+                            android:text="@string/date"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@+id/leave_at" />
+            -->
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chipGroup"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="10dp"
+                app:chipSpacingHorizontal="10dp"
+                app:chipSpacingVertical="0dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/arrival_place">
+                <!--                app:layout_constraintTop_toBottomOf="@+id/date">-->
 
-                    <Button
-                        android:id="@+id/date"
-                        android:layout_width="300dp"
-                        android:layout_height="45dp"
-                        android:backgroundTint="@color/main_color"
-                        android:text="Date" />
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/personal_by_cycle"
+                    style="@style/Widget.Material3.Chip.Input.Icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/personal_by_cycle"
+                    app:checkedIcon="@drawable/baseline_check_24"
+                    app:closeIcon="@drawable/baseline_directions_bike_24" />
 
-                </LinearLayout>
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/car"
+                    style="@style/Widget.Material3.Chip.Input.Icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/car"
+                    app:checkedIcon="@drawable/baseline_check_24"
+                    app:closeIcon="@drawable/baseline_directions_car_24" />
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginTop="490dp"
-                    android:orientation="vertical"
-                    app:layout_constraintTop_toTopOf="parent">
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/tram"
+                    style="@style/Widget.Material3.Chip.Input.Icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="@string/tram"
+                    app:checkedIcon="@drawable/baseline_check_24"
+                    app:closeIcon="@drawable/baseline_tram_24" />
 
-                    <Button
-                        android:id="@+id/search"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:backgroundTint="@color/main_color"
-                        android:text="Search" />
-                </LinearLayout>
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/subways"
+                    style="@style/Widget.Material3.Chip.Input.Icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="@string/subways"
+                    app:checkedIcon="@drawable/baseline_check_24"
+                    app:closeIcon="@drawable/baseline_subway_24" />
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginTop="280dp"
-                    android:layout_marginBottom="100dp"
-                    android:orientation="vertical"
-                    app:layout_constraintBottom_toTopOf="@+id/linearLayout"
-                    app:layout_constraintTop_toTopOf="parent">
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/bus"
+                    style="@style/Widget.Material3.Chip.Input.Icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="@string/bus"
+                    app:checkedIcon="@drawable/baseline_check_24"
+                    app:closeIcon="@drawable/baseline_directions_bus_24" />
 
-                    <TextView
-                        android:id="@+id/textView3"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Selected mode"
-                        android:textSize="20sp"
-                        android:translationX="20dp" />
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/cable_car"
+                    style="@style/Widget.Material3.Chip.Input.Icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="@string/cable_car"
+                    app:checkedIcon="@drawable/baseline_check_24"
+                    app:closeIcon="@drawable/baseline_gondola_24" />
 
-                    <Switch
-                        android:id="@+id/noiseswitch"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="personal bycicle"
-                        android:textSize="14sp"
-                        android:translationX="20dp" />
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/wheel_chair"
+                    style="@style/Widget.Material3.Chip.Input.Icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/wheel_chair"
+                    app:checkedIcon="@drawable/baseline_check_24"
+                    app:closeIcon="@drawable/baseline_accessible_24" />
 
-                    <Switch
-                        android:id="@+id/crowdswitch"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="velib"
-                        android:textSize="14sp"
-                        android:translationX="20dp" />
+            </com.google.android.material.chip.ChipGroup>
 
-                    <Switch
-                        android:id="@+id/lightswitch"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="public transportation"
-                        android:textSize="14sp"
-                        android:translationX="20dp" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
 
-                    <Switch
-                        android:id="@+id/switch1"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="just walking"
-                        android:translationX="20dp" />
-                </LinearLayout>
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/search"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="10dp"
+        android:text="@string/search"
+        app:icon="@drawable/checkbox_marked_circle_outline"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
 
-        </androidx.cardview.widget.CardView>
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

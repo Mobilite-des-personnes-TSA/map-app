@@ -2,8 +2,12 @@ package com.example.myapplication
 
 import android.app.Activity
 import android.content.Intent
+import android.content.SharedPreferences
+import android.content.res.Resources.NotFoundException
+import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.view.View
+import android.os.Looper
+import android.util.Log
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.Toast
@@ -15,7 +19,14 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.preference.PreferenceManager
+import com.example.myapplication.tisseo.BUS
+import com.example.myapplication.tisseo.BUS_RAPID_TRANSIT
+import com.example.myapplication.tisseo.CABLE_CAR
+import com.example.myapplication.tisseo.METRO
+import com.example.myapplication.tisseo.SHUTTLE
+import com.example.myapplication.tisseo.TRAMWAY
 import com.example.myapplication.tisseo.TisseoApiClient
+import com.example.myapplication.tisseo.TisseoOsrmUtils
 import org.osmdroid.bonuspack.routing.OSRMRoadManager
 import org.osmdroid.bonuspack.routing.Road
 import org.osmdroid.bonuspack.routing.RoadManager
@@ -26,17 +37,28 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
-
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import kotlin.math.exp
 
 class MainActivity : AppCompatActivity() {
     private lateinit var map: MapView
     private lateinit var buttonJourneyPlanner: Button
     private lateinit var buttonSettings: Button
+    private val tisseoDateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+
+    private lateinit var markerNormal: Drawable
+    private lateinit var markerDanger: Drawable
+
+    private lateinit var sharedPreferences: SharedPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
+
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+
         super.onCreate(savedInstanceState)
-        getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this))
+        getInstance().load(this, sharedPreferences)
         setContentView(R.layout.activity_main)
 
         map = findViewById(R.id.map)
@@ -47,13 +69,27 @@ class MainActivity : AppCompatActivity() {
         mapController.setCenter(startCenterPoint)
 
         buttonJourneyPlanner = findViewById(R.id.button_journey_planner)
-        buttonJourneyPlanner.setOnClickListener(this::openJourneyPlanner)
+        buttonJourneyPlanner.setOnClickListener { openJourneyPlanner() }
 
         buttonSettings = findViewById(R.id.button_settings)
         buttonSettings.setOnClickListener {
             val intent = Intent(this, SettingsActivity::class.java)
             startActivity(intent)
         }
+
+        markerNormal =
+            ResourcesCompat.getDrawable(resources, R.drawable.map_marker_outline, theme)!!
+        markerNormal.setTint(
+            ResourcesCompat.getColor(
+                resources, com.google.android.material.R.color.foreground_material_light, theme
+            )
+        )
+        markerDanger = ResourcesCompat.getDrawable(resources, R.drawable.map_marker_alert, theme)!!
+        markerDanger.setTint(
+            ResourcesCompat.getColor(
+                resources, com.google.android.material.R.color.error_color_material_light, theme
+            )
+        )
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.topView)) { view, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -84,119 +120,239 @@ class MainActivity : AppCompatActivity() {
         map.onPause()  //needed for compass, my location overlays, v6.0.0 and up
     }
 
-    private fun tisseoRouting(startPlace: String, endPlace: String) {
-        Thread {
-            val journeyData = TisseoApiClient.journey(startPlace, endPlace, "walk", "1")
-            val road = Road()
-            if (journeyData != null) {
-                journeyData.routePlannerResult.journeys[0].journey.chunks.forEach { chunk ->
+    data class RoadNodeForRouting(val road: Road, val cost: Double)
 
-                    if (chunk.service != null) {
-                        val wkt = chunk.service.wkt
-                        val coordinates =
-                            wkt.substringAfter("(").substringBeforeLast(")").split(",")
-                        val roadNode = RoadNode()
-                        roadNode.mInstructions = chunk.service.text?.text
-                        val (long, lat) = coordinates[0].trim().split(" ")
-                        val units = chunk.service.duration.split(":".toRegex())
-                            .dropLastWhile { it.isEmpty() }
-                            .toTypedArray()
-                        val duration =
-                            3600 * units[0].toInt() + 60 * units[1].toInt() + units[2].toInt()
-                        roadNode.mDuration = duration.toDouble()
-                        roadNode.mLocation = GeoPoint(lat.toDouble(), long.toDouble())
-                        road.mNodes.add(roadNode)
-                        coordinates.forEach { coordinate ->
-                            val (longitude, latitude) = coordinate.trim().split(" ")
-                            road.mRouteHigh.add(GeoPoint(latitude.toDouble(), longitude.toDouble()))
-                        }
-                    } else if (chunk.street != null) {
-                        val wkt = chunk.street.wkt
-                        val roadNode = RoadNode()
-                        roadNode.mInstructions = chunk.street.text.text
-                        val units = chunk.street.duration.split(":".toRegex())
-                            .dropLastWhile { it.isEmpty() }
-                            .toTypedArray()
-                        val duration =
-                            3600 * units[0].toInt() + 60 * units[1].toInt() + units[2].toInt()
-                        roadNode.mDuration = duration.toDouble()
-                        roadNode.mLength = chunk.street.length.toDouble() / 1000
-                        roadNode.mLocation = GeoPoint(
-                            chunk.street.startAddress.connectionPlace.latitude.toDouble(),
-                            chunk.street.startAddress.connectionPlace.longitude.toDouble()
-                        )
-                        road.mNodes.add(roadNode)
-                        val intermediateCoordinates = wkt.substringAfter("(")
-                        val coordinates: List<String> = if (intermediateCoordinates[0] == '(') {
-                            wkt.substringAfter("((").substringBeforeLast("))").split(",")
-                        } else {
-                            wkt.substringAfter("(").substringBeforeLast(")").split(",")
-                        }
 
-                        coordinates.forEach { coordinate ->
-                            val (longitude, latitude) = coordinate.trim().split(" ")
-                            road.mRouteHigh.add(GeoPoint(latitude.toDouble(), longitude.toDouble()))
+    private fun tisseoRouting(
+        startPlace: String,
+        endPlace: String,
+        date: LocalDateTime,
+        wheelChair: Boolean,
+        bus: Boolean,
+        tram: Boolean,
+        subway: Boolean,
+        cableCar: Boolean,
+        car: Boolean,
+        bike: Boolean
+    ) {
+        val file = ArrayList<RoadNodeForRouting>()
 
-                        }
-                    }
-                }
+        val geoPointStart = TisseoOsrmUtils.addressToGeoPoint(startPlace)
+        if (geoPointStart == null) {
+            Toast.makeText(this, "Start place not found", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val geoPointEnd = TisseoOsrmUtils.addressToGeoPoint(endPlace)
+        if (geoPointEnd == null) {
+            Toast.makeText(this, "End place not found", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val listDate = listOf(
+            date,
+            date.plusMinutes(20),
+            date.plusMinutes(40),
+        )
+
+        val roadModeList = mutableListOf("walk")
+        if (bike) roadModeList.add("bike")
+        if (wheelChair) roadModeList.add("wheelchair")
+
+        val transports = ArrayList<List<String>>()
+        if (bus) transports.add(listOf(SHUTTLE, BUS))
+        if (tram) transports.add(listOf(TRAMWAY, BUS_RAPID_TRANSIT))
+        if (subway) transports.add(listOf(METRO))
+        if (cableCar) transports.add(listOf(CABLE_CAR))
+        transports.add(transports.flatten())
+
+
+        // <Plot a dit> : y'a pas de tram a toulouse donc le mode de transport 2 ne sert à rien
+
+        for (newDate in listDate) {
+
+            for (roadMode in roadModeList) {
+                osrmRouting(geoPointStart, geoPointEnd, roadMode, file)
+                for (transport in transports) aRouting(
+                    geoPointStart,
+                    geoPointEnd,
+                    roadMode,
+                    file,
+                    newDate,
+                    transport
+                )
             }
 
+            if (car) osrmRouting(geoPointStart, geoPointEnd, "car", file)
+        }
 
-            /*println("Points de la route ajoutés:")
-            road.mRouteHigh.forEachIndexed { index, geoPoint ->
-                println("Point $index : Latitude = ${geoPoint.latitude}, Longitude = ${geoPoint.longitude}")
-            }*/
-            drawJourney(road)
-            map.invalidate()
-        }.start()
+        drawJourney(selectBest(file).road)
     }
 
-    @Suppress("unused")
-    fun osrmRouting(startPoint: GeoPoint, endPoint: GeoPoint, mode: String) {
-        Thread {
-            val roadManager: RoadManager = OSRMRoadManager(this, "User")
-            when (mode) {
-                "bike" -> {
-                    (roadManager as OSRMRoadManager).setMean(OSRMRoadManager.MEAN_BY_BIKE)
-                }
+    private fun selectBest(file: List<RoadNodeForRouting>) =
+        file.minByOrNull(RoadNodeForRouting::cost) ?: throw NotFoundException("No road found")
 
-                "car" -> {
-                    (roadManager as OSRMRoadManager).setMean(OSRMRoadManager.MEAN_BY_CAR)
-                }
 
-                else -> {
-                    (roadManager as OSRMRoadManager).setMean(OSRMRoadManager.MEAN_BY_FOOT)
-                }
+    private fun aRouting(
+        startPlace: GeoPoint,
+        endPlace: GeoPoint,
+        roadMode: String,
+        file: MutableList<RoadNodeForRouting>,
+        date: LocalDateTime,
+        rollingStocks: List<String>
+    ) {
+        TisseoApiClient.journey(
+            "${startPlace.latitude},${startPlace.longitude}",
+            "${endPlace.latitude},${endPlace.longitude}",
+            roadMode,
+            "4",
+            date.format(tisseoDateFormatter),
+            rollingStocks.joinToString(",")
+        )?.apply {
+            routePlannerResult.journeys.forEach { j ->
+                val road = TisseoOsrmUtils.journeyToRoad(j.journey)
+                val price = price(road)
+                file.add(RoadNodeForRouting(road, price))
             }
+        }
+    }
 
-            val waypoints = ArrayList<GeoPoint>()
-            waypoints.add(startPoint)
-            waypoints.add(endPoint)
-            val road: Road = roadManager.getRoad(waypoints)
-            if (road.mStatus != Road.STATUS_OK) Toast.makeText(
-                this,
-                "Error when loading the road - status=" + road.mStatus,
-                Toast.LENGTH_SHORT
-            ).show()
 
-            drawJourney(road)
-            map.invalidate()
-        }.start()
+    private fun osrmRouting(
+        startPoint: GeoPoint,
+        endPoint: GeoPoint,
+        mode: String,
+        file: MutableList<RoadNodeForRouting>
+    ) {
+
+        val roadManager = OSRMRoadManager(this, "User")
+        when (mode) {
+            "bike" -> roadManager.setMean(OSRMRoadManager.MEAN_BY_BIKE)
+            "car" -> roadManager.setMean(OSRMRoadManager.MEAN_BY_CAR)
+            else -> roadManager.setMean(OSRMRoadManager.MEAN_BY_FOOT)
+        }
+
+        val waypoints = arrayListOf(startPoint, endPoint)
+
+        val road = roadManager.getRoad(waypoints)
+        val price = price(road)
+        file.add(RoadNodeForRouting(road, price))
+    }
+
+    private fun price(road: Road) : Double{
+        val out =normalise()
+
+        return road.mNodes.sumOf {
+            (exp(crowd(it)/out) + exp(light(it)/out) + exp(sound(it)/out) + 1/out) * it.mLength
+        }
+    }
+
+    /*
+        Le but de cette fonction est de calculer à qu'elle point un chemin est pénible
+        Sachant qu'une forte pénibilité sur une partie du trajet sera plus impactant pour l'utilisateur
+        qu'une pénibilité moyenne sur tout le trajet.
+        De plus le changement de pénibilité entre des chemins déja peu pénible aura
+        un impact faible
+
+        nous avons donc décidé de la représenter par une fonction exponentielle sur chaque critère
+     *//*
+        On en profite aussi pour définir les points de sensibilité
+     */
+
+    private fun crowd(roadNode: RoadNode): Double {
+        val out =
+            (if ((43.55 < roadNode.mLocation.latitude && roadNode.mLocation.latitude < 43.65) && (1.4 < roadNode.mLocation.longitude && roadNode.mLocation.longitude < 1.5)) {
+                (Math.random() * 2 + 1)
+            } else {
+                Math.random()
+            }
+                    * sharedPreferences.getInt("rowd", 0))
+
+        if (out > 2) {
+            roadNode.mManeuverType *= 2
+        }
+
+        return out
+    }
+
+    private fun light(roadNode: RoadNode): Double {
+        val out =
+            (if ((43.55 < roadNode.mLocation.latitude && roadNode.mLocation.latitude < 43.65) && (1.4 < roadNode.mLocation.longitude && roadNode.mLocation.longitude < 1.5)) {
+                (Math.random() * 2 + 1)
+            } else {
+                Math.random()
+            }
+                    * sharedPreferences.getInt("light", 0))
+
+        if (out > 2) {
+            roadNode.mManeuverType *= 3
+        }
+
+        return out
+    }
+
+    private fun sound(roadNode: RoadNode): Double {
+        val out =
+            (if ((43.55 < roadNode.mLocation.latitude && roadNode.mLocation.latitude < 43.65) && (1.4 < roadNode.mLocation.longitude && roadNode.mLocation.longitude < 1.5)) {
+                (Math.random() * 2 + 1)
+            } else {
+                Math.random()
+            }
+                    * sharedPreferences.getInt("sound", 0))
+
+
+        if (out > 2) {
+            roadNode.mManeuverType *= 5
+        }
+        return out
+    }
+
+    private fun normalise (): Int {
+        var some = 1
+
+        for (share in sharedPreferences.all.keys){
+            some += sharedPreferences.getInt(share, 0)
+        }
+
+        return some
     }
 
     private fun drawJourney(road: Road) {
         val roadOverlay: Polyline = RoadManager.buildRoadOverlay(road)
         map.overlays.clear()
         map.overlays.add(roadOverlay)
-        val nodeIcon = ResourcesCompat.getDrawable(resources, R.drawable.marker_node, theme)
+
+
         for (i in road.mNodes.indices) {
+            Log.d(
+                1.toString(),
+                "ajout à la map du point : latitude " + road.mNodes[i].mLocation.latitude + " longitude " + road.mNodes[i].mLocation.longitude
+            )
+
             val node = road.mNodes[i]
             val nodeMarker = Marker(map)
             nodeMarker.setPosition(node.mLocation)
-            nodeMarker.icon = nodeIcon
             nodeMarker.title = "Step $i"
-            nodeMarker.snippet = node.mInstructions
+
+            if (node.mManeuverType == 1) {
+                nodeMarker.icon = markerNormal
+                nodeMarker.snippet = node.mInstructions
+            } else {
+                nodeMarker.icon = markerDanger
+                var string = ""
+
+                if ((node.mManeuverType % 2) == 0) {
+                    string += " Attention à la foule "
+                }
+                if ((node.mManeuverType % 3) == 0) {
+                    string += " Attention à la lumière "
+                }
+                if ((node.mManeuverType % 5) == 0) {
+                    string += " Attention au bruit  "
+                }
+
+                nodeMarker.snippet = string + node.mInstructions
+            }
+
 
             nodeMarker.subDescription =
                 Road.getLengthDurationText(this, node.mLength, node.mDuration)
@@ -204,7 +360,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun openJourneyPlanner(@Suppress("UNUSED_PARAMETER") view: View) {
+    private fun openJourneyPlanner() {
         val intent = Intent(this, JourneyPlanner::class.java)
         resultJourneyPlanner.launch(intent)
     }
@@ -212,14 +368,41 @@ class MainActivity : AppCompatActivity() {
     private var resultJourneyPlanner =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
-                result.data?.also {
-                    it.getStringExtra("Departure")?.also { departureAddress ->
-                        it.getStringExtra("Arrival")?.also { arrivalAddress ->
-                            tisseoRouting(departureAddress, arrivalAddress)
+                val data = result.data
+                if (data == null) {
+                    Toast.makeText(this, "Data error", Toast.LENGTH_SHORT).show()
+                } else {
+                    val departureAddress = data.getStringExtra("Departure")
+                    if (departureAddress == null) {
+                        Toast.makeText(this, "Data error", Toast.LENGTH_SHORT).show()
+                    } else {
+                        val arrivalAddress = data.getStringExtra("Arrival")
+                        if (arrivalAddress == null) {
+                            Toast.makeText(this, "Data error", Toast.LENGTH_SHORT).show()
+                        } else {
+                            Thread {
+                                Looper.prepare()
+                                try {
+                                    tisseoRouting(
+                                        departureAddress,
+                                        arrivalAddress,
+                                        LocalDateTime.now(),
+                                        wheelChair = data.getBooleanExtra("WheelChair", false),
+                                        car = data.getBooleanExtra("Car", false),
+                                        bike = data.getBooleanExtra("Bike", false),
+                                        bus = data.getBooleanExtra("Bus", true),
+                                        tram = data.getBooleanExtra("Tram", true),
+                                        subway = data.getBooleanExtra("Subway", true),
+                                        cableCar = data.getBooleanExtra("CableCar", true),
+                                    )
+                                } catch (e: NotFoundException) {
+                                    Log.wtf("MainActivity", e.message, e)
+                                    Toast.makeText(this, "No road found", Toast.LENGTH_SHORT).show()
+                                }
+                            }.start()
                         }
                     }
                 }
             }
-
         }
 }

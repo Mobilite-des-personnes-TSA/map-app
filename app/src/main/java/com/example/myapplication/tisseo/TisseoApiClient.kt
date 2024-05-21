@@ -4,7 +4,6 @@ import android.net.Uri
 import android.util.Log
 import com.example.myapplication.BuildConfig
 import kotlinx.serialization.DeserializationStrategy
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import java.io.BufferedInputStream
 import java.io.IOException
@@ -33,28 +32,36 @@ object TisseoApiClient {
     }
 
 
-    @ExperimentalSerializationApi
     fun places(
-        term: String, lang: String = "fr"
+        term: String = "", coordinatesXY: String = "", lang: String = "fr",
     ) = executeGetRequest(
         PlacesResponse.serializer(),
-        apiEntryUri.buildUpon().appendPath("places.json").appendQueryParameter("term", term)
-            .appendQueryParameter("lang", lang).build()
+        apiEntryUri.buildUpon().appendPath("places.json")
+            .appendQueryParameter("term", term)
+            .appendQueryParameter("coordinatesXY", coordinatesXY)
+            .appendQueryParameter("lang", lang)
+            .build(),
     )
+
 
     fun journey(
         departurePlace: String,
         arrivalPlace: String,
         roadMode: String,
         number: String,
+        firstDepartureDatetime: String,
+        rollingStockList: String = "commercial_mode:1,commercial_mode:3,commercial_mode:2",
         displayWording: String = "1",
         lang: String = "fr"
     ) = executeGetRequest(
         JourneyResponse.serializer(),
         apiEntryUri.buildUpon().appendPath("journeys.json")
-            .appendQueryParameter("departurePlace", departurePlace)
-            .appendQueryParameter("arrivalPlace", arrivalPlace)
-            .appendQueryParameter("roadMode", roadMode).appendQueryParameter("number", number)
+            .appendQueryParameter("departurePlaceXY", departurePlace)
+            .appendQueryParameter("arrivalPlaceXY", arrivalPlace)
+            .appendQueryParameter("firstDepartureDatetime", firstDepartureDatetime)
+            .appendQueryParameter("roadMode", roadMode)
+            .appendQueryParameter("rollingStockList", rollingStockList)
+            .appendQueryParameter("number", number)
             .appendQueryParameter("displayWording", displayWording)
             .appendQueryParameter("lang", lang).build()
     )

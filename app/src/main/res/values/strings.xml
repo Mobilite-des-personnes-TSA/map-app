@@ -5,25 +5,36 @@
 
 
     <string name="title_activity_setting">Settings</string>
-    <string name="title_activity_fragment_second">fragment_second</string>
 
 
     <!-- Preference Titles -->
-    <string name="messages_header">Messages</string>
-    <string name="sync_header">Sync</string>
 
     <!-- Messages Preferences -->
-    <string name="signature_title">Your signature</string>
-    <string name="reply_title">Default reply action</string>
 
     <!-- Sync Preferences -->
-    <string name="sync_title">Sync email periodically</string>
-    <string name="attachment_title">Download incoming attachments</string>
-    <string name="attachment_summary_on">Automatically download attachments for incoming emails
-    </string>
-    <string name="attachment_summary_off">Only download attachments when manually requested</string>
-    <string name="title_activity_choix_dest">ChoixDest</string>
-    <string name="button">Button</string>
-    <string name="trajet">Trajet</string>
-    <string name="param_tre">Settings</string>
+    <string name="to_jorney_action">Search itinerary</string>
+    <string name="search">Search</string>
+    <string name="date">Date</string>
+    <string name="arrive_by">Arrive by</string>
+    <string name="leave_at">Leave at</string>
+    <string name="arrival_place">Arrival</string>
+    <string name="departure_place">Departure</string>
+    <string name="title_activity_journey">Journey planner</string>
+    <string name="car">Car</string>
+    <string name="personal_by_cycle">Bicycle</string>
+    <string name="tram">Tramways</string>
+    <string name="subways">Subways</string>
+    <string name="bus">Bus</string>
+    <string name="cable_car">Cable car</string>
+    <string name="wheel_chair">Wheel chair accessible</string>
+    <string name="arival_hint">Indicate the name of the destination.</string>
+    <string name="departure_hint">Indicate the name of the place of departure.</string>
+    <string name="summary_sensibility_light">How uncomfortable I feel when there\'s light</string>
+    <string name="title_sensibility_light">Light sensitivity</string>
+    <string name="title_sensibility_crowd">Crowd sensitivity</string>
+    <string name="summary_sensibility_crowd">How uncomfortable I feel when there\'s crowd</string>
+    <string name="title_sensibility_noise">Noise sensitivity</string>
+    <string name="summary_sensibility_global">The parts of the city I want to avoid.</string>
+    <string name="title_sensibility_global">Sensibility</string>
+    <string name="summary_sensibility_noise">How uncomfortable I feel when there\'s noise</string>
 </resources>

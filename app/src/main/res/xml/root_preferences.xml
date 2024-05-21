@@ -1,27 +1,38 @@
-<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <PreferenceCategory
-        app:title="Sensibilité"
-        app:summary="Les éléments de la ville que je veux éviter.">
+        app:title="@string/title_sensibility_global"
+        app:summary="@string/summary_sensibility_global">
 
-        <SwitchPreferenceCompat
+        <SeekBarPreference
+            android:layout_width="match_parent"
+            android:defaultValue="0"
+            android:max="5"
             app:key="noise"
-            app:title="Nuisances sonores"
-            app:summaryOn="Le bruit me dérange."
-            app:summaryOff="Le bruit ne me dérange pas."/>
+            app:icon="@drawable/rounded_brand_awareness_24"
+            app:showSeekBarValue="true"
+            app:summary="@string/summary_sensibility_noise"
+            app:title="@string/title_sensibility_noise" />
 
 
-        <SwitchPreferenceCompat
+        <SeekBarPreference
+            android:defaultValue="0"
+            android:max="5"
             app:key="crowd"
-            app:title="Foule"
-            app:summaryOn="Je n'aime pas lorsque il y a trop de monde."
-            app:summaryOff="Lorsqu'il y a trop de monde, ce n'est pas un problème."/>
+            app:icon="@drawable/rounded_groups_24"
+            app:showSeekBarValue="true"
+            app:summary="@string/summary_sensibility_crowd"
+            app:title="@string/title_sensibility_crowd" />
 
-        <SwitchPreferenceCompat
+        <SeekBarPreference
+            android:defaultValue="0"
+            android:max="5"
             app:key="light"
-            app:title="Zone lumineuse"
-            app:summaryOn="Je veut évité la lumière."
-            app:summaryOff="La lumière ne me dérange pas."/>
+            app:icon="@drawable/rounded_light_mode_24"
+            app:showSeekBarValue="true"
+            app:summary="@string/summary_sensibility_light"
+            app:title="@string/title_sensibility_light" />
 
     </PreferenceCategory>
 </PreferenceScreen>
